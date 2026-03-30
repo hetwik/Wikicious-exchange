@@ -1,0 +1,35 @@
+{
+  "name": "wikicious-v5",
+  "version": "5.0.0",
+  "description": "Wikicious Exchange — Node.js API, WebSocket, and keeper bots",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "keeper": "node src/services/keeper.js",
+    "guardian": "node src/services/guardian_keeper.js",
+    "bots": "node src/services/bots/bot_engine.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.2",
+    "express": "^4.21.1",
+    "ws": "^8.18.0",
+    "better-sqlite3": "^11.3.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^10.0.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "express-rate-limit": "^7.4.1",
+    "dotenv": "^16.4.5",
+    "morgan": "^1.10.0",
+    "axios": "^1.7.7",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

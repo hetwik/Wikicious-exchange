@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Wikicious — Onboarding Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#03080F;--card:#07111C;--b:#0F2035;--b2:#152840;
+  --G:#00F5A8;--B:#0085FF;--V:#7B5CF0;--A:#FFB020;--R:#FF3355;
+  --t1:#EEF5FF;--t2:#5C7EA0;--t3:#243448;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--t1)}
+button{cursor:pointer;font-family:'DM Sans',sans-serif;outline:none}
+input{font-family:'JetBrains Mono',monospace}
+
+/* ── Layout ── */
+.shell{
+  width:100%;max-width:440px;min-height:100vh;
+  margin:0 auto;display:flex;flex-direction:column;
+  position:relative;
+}
+.topbar{
+  padding:16px 20px 0;position:sticky;top:0;
+  background:var(--bg);z-index:10;
+}
+.logo{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.logo-mark{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--G),var(--B));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;color:#000;margin-right:8px;
+}
+.logo-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.5px}
+.step-counter{font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+
+/* Progress */
+.progress-bar{margin-bottom:16px}
+.progress-track{height:3px;background:var(--b);border-radius:2px;overflow:hidden}
+.progress-fill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--G),var(--B));
+  transition:width .4s cubic-bezier(.4,0,.2,1);
+}
+.steps-row{display:flex;justify-content:space-between;margin-top:8px}
+.step-item{display:flex;align-items:center;gap:6px}
+.step-dot{
+  width:26px;height:26px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;font-family:'JetBrains Mono',monospace;
+  transition:all .3s;flex-shrink:0;
+}
+.step-dot.active{background:rgba(0,245,168,.15);border:1.5px solid var(--G);color:var(--G)}
+.step-dot.done{background:var(--G);border:1.5px solid var(--G);color:#000}
+.step-dot.idle{background:var(--b2);border:1.5px solid var(--b2);color:var(--t2)}
+.step-label{font-size:12px;font-weight:600;transition:color .3s}
+.step-item.active .step-label{color:var(--t1)}
+.step-item.idle{opacity:.35}
+
+/* Content */
+.content{flex:1;padding:0 20px 32px;overflow-y:auto}
+.bottom-back{padding:0 20px 20px;background:var(--bg)}
+
+/* Step pages */
+.step-page{animation:fadeUp .25s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Hero */
+.hero{text-align:center;padding:24px 0 8px}
+.hero-icon{
+  width:72px;height:72px;border-radius:20px;margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;font-size:32px;
+}
+.hero h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--t1);margin:0 0 8px;letter-spacing:-1px}
+.hero p{font-size:12px;color:var(--t2);line-height:1.6;max-width:260px;margin:0 auto}
+
+/* Wallet list */
+.wallet-list{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.wallet-btn{
+  display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-radius:14px;background:var(--card);border:1.5px solid var(--b2);
+  color:var(--t1);transition:all .15s;width:100%;text-align:left;
+}
+.wallet-btn:hover{border-color:var(--G);background:rgba(0,245,168,.05)}
+.wallet-icon{font-size:22px;flex-shrink:0}
+.wallet-name{flex:1;font-weight:600;font-size:14px}
+.wallet-arrow{color:var(--t3);font-size:14px}
+.trust-row{display:flex;justify-content:center;gap:20px;padding:12px 0;border-top:1px solid var(--b);margin-top:4px}
+.trust-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2)}
+.trust-check{color:var(--G)}
+
+/* Pill */
+.pill{
+  display:inline-block;padding:2px 10px;border-radius:100px;
+  font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;
+}
+
+/* Strategy cards */
+.strat-card{
+  display:block;text-align:left;padding:14px 16px;border-radius:16px;
+  background:var(--card);border:1.5px solid var(--b2);
+  cursor:pointer;transition:all .2s;width:100%;margin-bottom:10px;
+}
+.strat-card.selected{box-shadow:0 4px 24px rgba(0,0,0,.3)}
+.strat-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.strat-icon{
+  width:40px;height:40px;border-radius:11px;font-size:18px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.strat-title{display:flex;align-items:center;gap:7px;margin-bottom:2px}
+.strat-name{font-size:14px;font-weight:800;color:var(--t1)}
+.strat-tagline{font-size:11px;font-weight:600}
+.strat-radio{
+  width:22px;height:22px;border-radius:50%;
+  border:2px solid var(--b);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;transition:all .2s;
+}
+.strat-desc{font-size:11px;color:var(--t2);line-height:1.6;margin:0 0 10px}
+.stats-row{display:flex;gap:7px}
+.stat-badge{
+  flex:1;background:var(--b);border-radius:10px;
+  padding:8px 10px;border:1px solid var(--b2);
+}
+.stat-label{font-size:8px;color:var(--t2);font-weight:700;margin-bottom:3px;letter-spacing:.5px}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700}
+
+/* Deposit */
+.amount-box{
+  background:var(--b);border-radius:14px;padding:16px;
+  border:1.5px solid var(--b2);transition:border-color .2s;margin-bottom:10px;
+}
+.amount-box.valid{border-color:var(--G)}
+.amount-label{font-size:9px;color:var(--t2);font-weight:700;margin-bottom:8px;letter-spacing:.8px}
+.amount-row{display:flex;align-items:center;gap:10px}
+.amount-symbol{font-size:28px;color:var(--t2);font-weight:300}
+.amount-input{
+  flex:1;background:none;border:none;outline:none;
+  font-size:36px;font-weight:700;color:var(--t1);
+  font-family:'JetBrains Mono',monospace;width:0;min-width:0;
+}
+.amount-denom{font-size:12px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+.amount-error{font-size:10px;color:var(--R);margin-top:6px}
+.presets{display:flex;gap:7px;margin-bottom:10px}
+.preset-btn{
+  flex:1;padding:9px 4px;border-radius:10px;
+  border:1.5px solid var(--b2);background:var(--card);
+  color:var(--t2);font-size:12px;font-weight:700;
+  font-family:'JetBrains Mono',monospace;transition:all .15s;
+}
+.preset-btn.active{border-color:var(--G);background:rgba(0,245,168,.1);color:var(--G)}
+.info-box{
+  background:var(--card);border-radius:12px;padding:12px 14px;
+  border:1px solid var(--b2);margin-bottom:10px;
+}
+.info-title{font-size:9px;color:var(--t2);font-weight:700;margin-bottom:8px;letter-spacing:.8px}
+.info-text{font-size:11px;color:var(--t2);line-height:1.8}
+.fiat-row{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--b);border-radius:12px;border:1px solid var(--b2);
+  margin-bottom:10px;
+}
+.fiat-icon{font-size:18px}
+.fiat-title{font-size:12px;font-weight:600;color:var(--t1)}
+.fiat-sub{font-size:10px;color:var(--t2)}
+.fiat-btn{
+  padding:6px 12px;border-radius:8px;
+  background:rgba(0,133,255,.2);border:1px solid rgba(0,133,255,.4);
+  color:var(--B);font-size:11px;font-weight:700;
+}
+.cta-btn{
+  width:100%;padding:15px;border-radius:14px;border:none;
+  font-weight:800;font-size:15px;font-family:'Syne',sans-serif;
+  letter-spacing:.3px;transition:all .2s;
+}
+.cta-btn:disabled{background:var(--b2);color:var(--t3);cursor:not-allowed;box-shadow:none}
+
+/* Done screen */
+.done-screen{display:flex;flex-direction:column;align-items:center;gap:20px;padding:32px 4px;text-align:center}
+.ring-wrap{position:relative;width:100px;height:100px}
+.ring-wrap svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+.ring-icon{
+  position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-size:34px;
+}
+.done-h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:900;color:var(--t1);margin:0 0 8px;letter-spacing:-1px}
+.done-p{font-size:13px;color:var(--t2);line-height:1.7;max-width:280px}
+.next-box{
+  width:100%;background:var(--card);border-radius:14px;padding:16px;
+  border:1px solid var(--b2);text-align:left;
+}
+.next-title{font-size:9px;color:var(--t2);font-weight:700;margin-bottom:12px;letter-spacing:.8px}
+.next-item{display:flex;gap:10px;margin-bottom:12px}
+.next-icon{font-size:16px;margin-top:1px}
+.next-item-title{font-size:12px;font-weight:700;color:var(--t1)}
+.next-item-desc{font-size:10px;color:var(--t2);margin-top:1px}
+.launch-btn{
+  display:block;width:100%;padding:15px;border-radius:14px;
+  font-weight:900;font-size:15px;font-family:'Syne',sans-serif;
+  letter-spacing:.3px;text-align:center;text-decoration:none;
+  color:#000;cursor:pointer;border:none;
+}
+
+/* Back btn */
+.back-btn{
+  width:100%;padding:12px;border-radius:12px;
+  background:none;border:1px solid var(--b2);
+  color:var(--t2);font-size:13px;font-weight:600;
+  transition:all .15s;
+}
+.back-btn:hover{border-color:var(--t2);color:var(--t1)}
+
+/* Desktop preview wrapper */
+.preview-wrap{
+  min-height:100vh;background:var(--bg);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:40px 20px;gap:40px;
+}
+.phone-frame{
+  width:390px;min-height:840px;
+  background:var(--bg);border:1.5px solid var(--b2);
+  border-radius:44px;overflow:hidden;
+  box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04);
+  position:sticky;top:40px;flex-shrink:0;
+}
+.side-info{max-width:360px;padding-top:20px}
+.side-info h1{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;color:var(--t1);letter-spacing:-1.5px;margin-bottom:10px}
+.side-info p{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:24px}
+.feature-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.feature-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--card);border-radius:12px;border:1px solid var(--b2)}
+.feature-num{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--G);margin-top:1px;min-width:16px}
+.feature-text{}
+.feature-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.feature-desc{font-size:11px;color:var(--t2);line-height:1.5}
+.step-nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav-btn{
+  padding:8px 16px;border-radius:9px;
+  background:var(--card);border:1px solid var(--b2);
+  color:var(--t2);font-size:11px;font-weight:600;
+  transition:all .15s;
+}
+.nav-btn:hover,.nav-btn.active{background:rgba(0,245,168,.1);border-color:var(--G);color:var(--G)}
+</style>
+</head>
+<body>
+
+<div class="preview-wrap">
+  <!-- Phone frame -->
+  <div class="phone-frame">
+    <div id="app" class="shell"></div>
+  </div>
+
+  <!-- Side info -->
+  <div class="side-info">
+    <h1>Mobile-first onboarding</h1>
+    <p>Zero → first action in under 2 minutes. No jargon, no confusion, no dead ends. Each step has one clear question and one clear answer.</p>
+
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="feature-num">01</div>
+        <div class="feature-text">
+          <div class="feature-title">Connect Wallet</div>
+          <div class="feature-desc">MetaMask, WalletConnect, Coinbase, Rainbow, Ledger — all in one clean list. Trust indicators visible immediately.</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">02</div>
+        <div class="feature-text">
+          <div class="feature-title">Pick Strategy First</div>
+          <div class="feature-desc">Prop Challenge, Grid Bot, Funding Arb, or Manual Trading. Minimum deposit shown per strategy. User knows what they're signing up for before paying.</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">03</div>
+        <div class="feature-text">
+          <div class="feature-title">Deposit USDC</div>
+          <div class="feature-desc">Quick-select presets. Minimum enforced with clear error. Fiat on-ramp (MoonPay/Transak) shown for users who don't have USDC yet.</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-num">04</div>
+        <div class="feature-text">
+          <div class="feature-title">Done — Context-aware next steps</div>
+          <div class="feature-desc">Completion screen shows exactly what happens next for the chosen strategy. No generic "you're all set" message.</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:12px;color:var(--t2);margin-bottom:12px">Preview each step:</p>
+    <div class="step-nav">
+      <button class="nav-btn active" onclick="setStep(1)">① Connect</button>
+      <button class="nav-btn" onclick="setStep(2)">② Strategy</button>
+      <button class="nav-btn" onclick="setStep(3)">③ Deposit</button>
+      <button class="nav-btn" onclick="setStep(4)">✓ Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const P = {
+  bg:'#03080F',card:'#07111C',b:'#0F2035',b2:'#152840',
+  G:'#00F5A8',B:'#0085FF',V:'#7B5CF0',A:'#FFB020',R:'#FF3355',
+  t1:'#EEF5FF',t2:'#5C7EA0',t3:'#243448',
+};
+
+let currentStep = 1;
+let selectedStrategy = 'prop';
+let depositAmount = '';
+let activePreset = null;
+
+const strategies = [
+  { id:'prop',    icon:'🏆', title:'Prop Challenge',   tagline:'Prove your edge. Trade our capital.',   desc:'Pass a 2-phase evaluation and trade up to $200K of funded capital. Keep 80-90% of all profits.', stats:[['Entry fee','$50–$500'],['Funded','Up to $200K'],['Your split','80-90%']], accent:P.A, minUSDC:50,  cta:'Start Challenge',   popular:true  },
+  { id:'grid',    icon:'🤖', title:'Grid Bot',         tagline:'Set it, forget it, earn 24/7.',         desc:'Automated grid trading. Places buy/sell orders in a price range and profits from every oscillation.', stats:[['Win rate','60-70%'],['Max DD','15%'],['Perf fee','20% profits']], accent:P.G, minUSDC:10,  cta:'Start Grid Bot',    popular:false },
+  { id:'funding', icon:'⚡', title:'Funding Arb',      tagline:'Earn while the market sleeps.',          desc:'Delta-neutral strategy. Earns funding rate payments. 80-90% of periods positive. Near-zero price risk.', stats:[['Capture rate','80-90%'],['Price risk','Near zero'],['Entry','Rate > 15%']], accent:P.B, minUSDC:10,  cta:'Start Funding Arb', popular:false },
+  { id:'perp',    icon:'📈', title:'Trade Manually',   tagline:'Up to 1000× leverage. Your rules.',     desc:'Full access to perpetuals, spot, forex, metals and more. Advanced order types, portfolio margin.', stats:[['Max leverage','1000×'],['Markets','295+'],['Min deposit','$10']], accent:P.V, minUSDC:10,  cta:'Start Trading',     popular:false },
+];
+
+function pill(text, accent) {
+  return `<span class="pill" style="background:${accent}18;border-color:${accent}30;color:${accent}">${text}</span>`;
+}
+
+function stepDot(n, state) {
+  return `<div class="step-item ${state}">
+    <div class="step-dot ${state}">${state==='done'?'✓':n}</div>
+    <span class="step-label">${['Connect','Strategy','Deposit'][n-1]}</span>
+  </div>`;
+}
+
+function topBar(step) {
+  const pct = ((step-1)/3)*100;
+  if (step === 4) return `<div class="topbar"><div class="logo"><div style="display:flex;align-items:center"><div class="logo-mark">W</div><span class="logo-name">Wikicious</span></div></div></div>`;
+  return `<div class="topbar">
+    <div class="logo">
+      <div style="display:flex;align-items:center"><div class="logo-mark">W</div><span class="logo-name">Wikicious</span></div>
+      <span class="step-counter">Step ${step} of 3</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="steps-row">
+        ${stepDot(1, step>1?'done':step===1?'active':'idle')}
+        ${stepDot(2, step>2?'done':step===2?'active':'idle')}
+        ${stepDot(3, step>3?'done':step===3?'active':'idle')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderStep1() {
+  const wallets = [
+    {name:'MetaMask',icon:'🦊',popular:true},{name:'WalletConnect',icon:'🔗',popular:true},
+    {name:'Coinbase Wallet',icon:'🔵',popular:false},{name:'Rainbow',icon:'🌈',popular:false},{name:'Ledger',icon:'🔐',popular:false}
+  ];
+  return `<div class="step-page">
+    <div class="hero">
+      <div class="hero-icon" style="background:linear-gradient(135deg,${P.G}20,${P.B}20);border:1.5px solid ${P.G}30;box-shadow:0 0 40px ${P.G}15">🔗</div>
+      <h2>Connect your wallet</h2>
+      <p>Non-custodial. Your keys, your funds. Wikicious never touches your private key.</p>
+    </div>
+    <div class="wallet-list">
+      ${wallets.map(w=>`
+        <button class="wallet-btn" onclick="handleConnect()">
+          <span class="wallet-icon">${w.icon}</span>
+          <span class="wallet-name">${w.name}</span>
+          ${w.popular?pill('POPULAR',P.G):''}
+          <span class="wallet-arrow">›</span>
+        </button>`).join('')}
+    </div>
+    <div class="trust-row">
+      ${['Non-custodial','Audited','Open source'].map(t=>`<div class="trust-item"><span class="trust-check">✓</span>${t}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderStep2() {
+  return `<div class="step-page">
+    <div class="hero" style="padding-bottom:4px">
+      <h2>Pick your first strategy</h2>
+      <p>You can change this anytime. Start with what interests you most.</p>
+    </div>
+    ${strategies.map(s=>`
+      <button class="strat-card ${selectedStrategy===s.id?'selected':''}"
+        style="${selectedStrategy===s.id?`border-color:${s.accent};background:${s.accent}0F;box-shadow:0 4px 24px ${s.accent}20`:''}"
+        onclick="selectStrat('${s.id}')">
+        <div class="strat-top">
+          <div class="strat-icon" style="background:${s.accent}18;border:1px solid ${s.accent}30">${s.icon}</div>
+          <div style="flex:1">
+            <div class="strat-title">
+              <span class="strat-name">${s.title}</span>
+              ${s.popular?pill('MOST POPULAR',P.A):''}
+            </div>
+            <div class="strat-tagline" style="color:${s.accent}">${s.tagline}</div>
+          </div>
+          <div class="strat-radio" style="background:${selectedStrategy===s.id?s.accent:P.b2};border-color:${selectedStrategy===s.id?s.accent:P.b};color:${selectedStrategy===s.id?'#000':P.t3}">
+            ${selectedStrategy===s.id?'✓':''}
+          </div>
+        </div>
+        <p class="strat-desc">${s.desc}</p>
+        <div class="stats-row">
+          ${s.stats.map(([l,v])=>`
+            <div class="stat-badge">
+              <div class="stat-label">${l.toUpperCase()}</div>
+              <div class="stat-value" style="color:${s.accent}">${v}</div>
+            </div>`).join('')}
+        </div>
+      </button>`).join('')}
+  </div>`;
+}
+
+function renderStep3() {
+  const s = strategies.find(x=>x.id===selectedStrategy)||strategies[0];
+  const num = parseFloat(depositAmount)||0;
+  const valid = num >= s.minUSDC;
+  const presets = [10,50,100,500,1000].filter(p=>p>=s.minUSDC);
+  return `<div class="step-page">
+    <div class="hero" style="padding-bottom:4px">
+      <div class="hero-icon" style="background:${P.G}15;border:1.5px solid ${P.G}30">💵</div>
+      <h2>Deposit USDC</h2>
+      <p>Minimum $${s.minUSDC} for <span style="color:${s.accent};font-weight:700">${s.title}</span></p>
+    </div>
+    <div class="amount-box ${valid&&num>0?'valid':''}">
+      <div class="amount-label">AMOUNT (USDC)</div>
+      <div class="amount-row">
+        <span class="amount-symbol">$</span>
+        <input class="amount-input" type="number" value="${depositAmount}" placeholder="0"
+          oninput="handleAmount(this.value)" style="color:${P.t1}"/>
+        <span class="amount-denom">USDC</span>
+      </div>
+      ${num>0&&num<s.minUSDC?`<div class="amount-error">Minimum deposit is $${s.minUSDC} for ${s.title}</div>`:''}
+    </div>
+    <div class="presets">
+      ${presets.map(p=>`
+        <button class="preset-btn ${activePreset===p?'active':''}"
+          onclick="handlePreset(${p})">$${p}</button>`).join('')}
+    </div>
+    <div class="info-box">
+      <div class="info-title">WHERE YOUR FUNDS GO</div>
+      <div class="info-text">${s.id==='prop'
+        ?`Your $${num||s.minUSDC} pays the <span style="color:${P.A}">challenge fee</span>.<br/>You trade our pool capital — up to <span style="color:${P.G}">$200,000</span> funded.`
+        :`Deposited to <span style="color:${s.accent}">WikiBotVault</span>.<br/>Bot trades on your behalf 24/7. Withdraw anytime.`
+      }</div>
+    </div>
+    <div class="fiat-row">
+      <span class="fiat-icon">💳</span>
+      <div style="flex:1">
+        <div class="fiat-title">Don't have USDC?</div>
+        <div class="fiat-sub">Buy with card via MoonPay or Transak</div>
+      </div>
+      <button class="fiat-btn">Buy USDC</button>
+    </div>
+    <button class="cta-btn" ${!valid?'disabled':''}
+      style="${valid?`background:${s.accent};box-shadow:0 8px 24px ${s.accent}30;color:#000`:''}"
+      onclick="${valid?'setStep(4)':''}">
+      ${valid?`Deposit $${num} USDC →`:`Minimum $${s.minUSDC}`}
+    </button>
+  </div>`;
+}
+
+function renderStep4() {
+  const s = strategies.find(x=>x.id===selectedStrategy)||strategies[0];
+  const nextSteps = {
+    prop: [['📋','Phase 1 starts now','Hit 8% profit target in 30 days'],['📐','Rules enforced on-chain','Drawdown limit, consistency rule, min trading days'],['🏆','Pass both phases','Get funded account up to $200K'],['💵','Withdraw profits','Keep 80-90% of everything you earn']],
+    grid: [['🤖','Bot places orders','Grid of buy/sell in your price range'],['🔄','Earns on every cycle','Each oscillation = profit'],['📊','Monitor anytime','Track cycles, P&L, win rate live'],['💵','Withdraw anytime','No lockup, no waiting']],
+    funding:[['⚡','Bot monitors funding','Enters when rate > 15% APY'],['🛡','Delta-neutral hedge','Long spot + short perp = zero price risk'],['💰','Funding collected','Every 8-hour period generates income'],['🚪','Auto-exits','If funding turns negative, position closes']],
+    perp: [['📈','Markets are live','295+ trading pairs available now'],['🎯','Start with small size','Use max 5-10× leverage until comfortable'],['🛡','Set stop-losses','Always define your exit before entering'],['📊','Track your P&L','Leaderboard and trade history update live']],
+  };
+  return `<div class="step-page done-screen">
+    <div class="ring-wrap">
+      <svg width="100" height="100">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="${P.b}" stroke-width="5"/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="${s.accent}" stroke-width="5"
+          stroke-dasharray="${2*Math.PI*44}" stroke-dashoffset="0"
+          stroke-linecap="round" style="transition:stroke-dashoffset 1s"/>
+      </svg>
+      <div class="ring-icon">🎉</div>
+    </div>
+    <div>
+      <h2 class="done-h2">You're all set!</h2>
+      <p class="done-p"><span style="color:${s.accent};font-weight:700">${s.title}</span> is live.<br/>
+        ${depositAmount||s.minUSDC} USDC deposited. ${s.id==='prop'?'Challenge started.':'Bot running 24/7.'}</p>
+    </div>
+    <div class="next-box">
+      <div class="next-title">WHAT HAPPENS NEXT</div>
+      ${(nextSteps[selectedStrategy]||nextSteps.perp).map(([icon,title,desc])=>`
+        <div class="next-item">
+          <span class="next-icon">${icon}</span>
+          <div>
+            <div class="next-item-title">${title}</div>
+            <div class="next-item-desc">${desc}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <button class="launch-btn"
+      style="background:${s.accent};box-shadow:0 8px 24px ${s.accent}30">
+      Open ${s.title} →
+    </button>
+  </div>`;
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const showBack = currentStep > 1 && currentStep < 4;
+  app.innerHTML = `
+    ${topBar(currentStep)}
+    <div class="content">
+      ${currentStep===1?renderStep1():''}
+      ${currentStep===2?renderStep2():''}
+      ${currentStep===3?renderStep3():''}
+      ${currentStep===4?renderStep4():''}
+    </div>
+    ${showBack?`<div class="bottom-back"><button class="back-btn" onclick="setStep(${currentStep-1})">← Back</button></div>`:''}
+  `;
+  // Update nav buttons
+  document.querySelectorAll('.nav-btn').forEach((btn,i)=>{
+    btn.classList.toggle('active', i===currentStep-1);
+  });
+}
+
+function setStep(n) {
+  currentStep = n;
+  render();
+  document.getElementById('app').scrollTo({top:0,behavior:'smooth'});
+}
+
+function handleConnect() {
+  // Simulate connecting
+  setTimeout(()=>setStep(2), 400);
+}
+
+function selectStrat(id) {
+  selectedStrategy = id;
+  activePreset = null;
+  depositAmount = '';
+  render();
+  setTimeout(()=>setStep(3), 300);
+}
+
+function handleAmount(val) {
+  depositAmount = val;
+  activePreset = null;
+  render();
+  // Re-focus input
+  const inp = document.querySelector('.amount-input');
+  if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length); }
+}
+
+function handlePreset(val) {
+  depositAmount = String(val);
+  activePreset = val;
+  render();
+}
+
+// Initial render
+render();
+</script>
+</body>
+</html>

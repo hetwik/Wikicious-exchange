@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg0:    #08090D;
+  --bg1:    #0D0F17;
+  --bg2:    #12151F;
+  --bg3:    #181C28;
+  --bg4:    #1E2330;
+  --border: #222840;
+  --t1:     #E8EAF0;
+  --t2:     #8A90A8;
+  --t3:     #555C78;
+  --green:  #00D4A0;
+  --red:    #FF4F6B;
+  --accent: #5B7FFF;
+  --gold:   #F5C842;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  background: var(--bg0);
+  color: var(--t1);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--t3); }
+
+/* Range slider */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg0);
+  box-shadow: 0 0 6px rgba(91,127,255,0.4);
+}
+input[type=range]::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg0);
+}
+
+/* Number input - hide arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* Font mono */
+.font-mono { font-family: 'Space Mono', 'Courier New', monospace !important; }
+
+/* Animate pulse slow */
+@keyframes pulse-slow { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+.animate-pulse-slow { animation: pulse-slow 2.5s ease-in-out infinite; }
+
+/* Green/red flash on price update */
+@keyframes flash-green { 0%,100% { background:transparent; } 50% { background:rgba(0,212,160,0.12); } }
+@keyframes flash-red   { 0%,100% { background:transparent; } 50% { background:rgba(255,79,107,0.12); } }
+.flash-green { animation: flash-green 0.4s ease; }
+.flash-red   { animation: flash-red   0.4s ease; }
+
+/* Lightweight chart tooltip override */
+.tv-lightweight-charts { font-family: 'Space Mono', monospace !important; }

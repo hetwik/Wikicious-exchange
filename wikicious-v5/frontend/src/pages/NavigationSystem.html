@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
+<title>Wikicious V5 — Navigation & Feature Discovery</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030810;--bg2:#060C18;--bg3:#091220;--card:#0B1525;
+  --b:#0E1E35;--b2:#152840;--b3:#1C3652;
+  --G:#00F0A8;--B:#0075FF;--V:#7C4FFF;--A:#FFB020;--R:#FF2D55;--T:#00C8FF;--O:#FF5C35;
+  --t1:#E8F4FF;--t2:#4E6E90;--t3:#1E3250;
+  --nav-h:56px;--tab-h:58px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--t1)}
+button,a{cursor:pointer;font-family:'DM Sans',sans-serif;outline:none;border:none;text-decoration:none}
+::-webkit-scrollbar{width:2px;height:2px}
+::-webkit-scrollbar-thumb{background:var(--b3);border-radius:2px}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:230px;height:100%;background:var(--bg2);border-right:1px solid var(--b2);display:flex;flex-direction:column;flex-shrink:0;transition:width .3s cubic-bezier(.4,0,.2,1)}
+.sidebar.collapsed{width:68px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* ── TOP BAR ── */
+.topbar{height:var(--nav-h);background:rgba(3,8,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--b2);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:50}
+.topbar-logo{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:-.5px;white-space:nowrap}
+.lm{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--G),var(--B));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#000;flex-shrink:0}
+
+/* Search */
+.search-wrap{flex:1;max-width:400px;position:relative}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:10px;padding:8px 14px 8px 36px;font-size:13px;color:var(--t1);font-family:'DM Sans',sans-serif;transition:border-color .15s}
+.search-input:focus{outline:none;border-color:var(--B)}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--t2);pointer-events:none}
+.search-results{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1px solid var(--b2);border-radius:12px;z-index:200;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.sr-item{padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--b)}
+.sr-item:last-child{border-bottom:none}
+.sr-item:hover{background:var(--b)}
+.sr-icon{font-size:16px;flex-shrink:0}
+.sr-name{font-size:12px;font-weight:600}
+.sr-cat{font-size:10px;color:var(--t2);margin-top:1px}
+.sr-tag{padding:1px 7px;border-radius:100px;font-size:8px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-left:auto;flex-shrink:0}
+
+/* Top right */
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.notif-btn{width:34px;height:34px;border-radius:9px;background:var(--bg3);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:14px;position:relative;transition:border-color .15s}
+.notif-btn:hover{border-color:var(--B)}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--R);border:1.5px solid var(--bg2)}
+.wallet-btn{padding:7px 14px;border-radius:10px;background:linear-gradient(135deg,var(--G)20,var(--B)20);border:1px solid var(--G)40;color:var(--G);font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all .15s}
+.wallet-btn:hover{background:linear-gradient(135deg,var(--G)30,var(--B)30)}
+.network-badge{padding:4px 10px;border-radius:7px;background:var(--bg3);border:1px solid var(--b2);font-size:10px;font-weight:700;color:var(--t2);font-family:'JetBrains Mono',monospace}
+
+/* ── SIDEBAR ── */
+.sidebar-header{padding:14px 12px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;height:var(--nav-h)}
+.collapse-btn{width:26px;height:26px;border-radius:7px;background:var(--bg3);border:1px solid var(--b2);color:var(--t2);font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.collapse-btn:hover{border-color:var(--t2);color:var(--t1)}
+.sidebar-scroll{flex:1;overflow-y:auto;padding:8px 0}
+.nav-section{margin-bottom:4px}
+.nav-section-label{padding:6px 14px 4px;font-size:9px;font-weight:700;color:var(--t3);letter-spacing:1.5px;white-space:nowrap;overflow:hidden;font-family:'JetBrains Mono',monospace}
+.sidebar.collapsed .nav-section-label{opacity:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;margin:1px 6px;cursor:pointer;transition:all .15s;position:relative;white-space:nowrap}
+.nav-item:hover{background:var(--b)}
+.nav-item.active{background:linear-gradient(135deg,var(--B)18,var(--G)08);border:1px solid var(--B)25}
+.nav-item.active .nav-label{color:var(--t1)}
+.nav-item.active .nav-icon-wrap{background:var(--B)20;border-color:var(--B)30}
+.nav-icon-wrap{width:28px;height:28px;border-radius:8px;background:var(--bg3);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:all .15s}
+.nav-label{font-size:12px;font-weight:600;color:var(--t2);transition:color .15s;overflow:hidden}
+.nav-item:hover .nav-label,.nav-item.active .nav-label{color:var(--t1)}
+.nav-badge{margin-left:auto;padding:1px 7px;border-radius:100px;font-size:8px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.new-b{background:var(--G)18;color:var(--G);border:1px solid var(--G)30}
+.hot-b{background:var(--R)18;color:var(--R);border:1px solid var(--R)30}
+.earn-b{background:var(--A)18;color:var(--A);border:1px solid var(--A)30}
+
+/* sidebar bottom */
+.sidebar-bottom{border-top:1px solid var(--b);padding:10px 6px}
+.sidebar-user{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;background:var(--bg3);border:1px solid var(--b);cursor:pointer;transition:border-color .15s}
+.sidebar-user:hover{border-color:var(--B)}
+.user-avatar{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--V),var(--B));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.user-name{font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.user-sub{font-size:9px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+
+/* ── CONTENT AREA ── */
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* ── DISCOVER PAGE ── */
+.discover-hero{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--b2);border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.discover-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,var(--G)08,transparent 70%);pointer-events:none}
+.dh-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+.dh-sub{font-size:13px;color:var(--t2);max-width:500px;line-height:1.6}
+.dh-stats{display:flex;gap:20px;margin-top:16px}
+.dh-stat{text-align:center}
+.dh-stat-v{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--G)}
+.dh-stat-l{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:.5px;margin-top:2px}
+
+/* Quick actions */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.qa-card{padding:14px;border-radius:13px;background:var(--card);border:1px solid var(--b2);cursor:pointer;transition:all .2s;text-align:center}
+.qa-card:hover{border-color:var(--G);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.qa-icon{font-size:24px;margin-bottom:7px}
+.qa-title{font-size:11px;font-weight:700;color:var(--t1)}
+.qa-sub{font-size:9px;color:var(--t2);margin-top:2px}
+
+/* Feature sections */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+.section-see-all{font-size:11px;color:var(--B);font-weight:600;background:none;border:none}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px}
+.feat-card{padding:13px;border-radius:12px;background:var(--card);border:1px solid var(--b2);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:11px}
+.feat-card:hover{border-color:attr(data-c);transform:translateY(-1px)}
+.feat-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.feat-name{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.feat-desc{font-size:9px;color:var(--t2);line-height:1.4}
+.feat-tag{padding:1px 6px;border-radius:100px;font-size:7px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:4px;display:inline-block}
+
+/* ── MOBILE BOTTOM TAB ── */
+.mobile-tabs{display:none;height:var(--tab-h);background:var(--bg2);border-top:1px solid var(--b2);padding:0 4px 4px;justify-content:space-around;align-items:center;position:fixed;bottom:0;left:0;right:0;z-index:100;backdrop-filter:blur(20px)}
+.mtab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:10px;cursor:pointer;transition:all .15s;position:relative}
+.mtab.active{background:var(--B)15}
+.mtab-icon{font-size:19px;line-height:1}
+.mtab-label{font-size:9px;font-weight:700;color:var(--t2);transition:color .15s}
+.mtab.active .mtab-label{color:var(--B)}
+.mtab-badge{position:absolute;top:4px;right:calc(50% - 14px);background:var(--R);color:#fff;font-size:7px;font-weight:700;padding:1px 4px;border-radius:100px;font-family:'JetBrains Mono',monospace}
+
+/* ── FEATURE DETAIL PANEL ── */
+.detail-panel{position:absolute;inset:0;background:var(--bg);z-index:80;overflow-y:auto;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.detail-panel.open{transform:translateX(0)}
+.dp-header{position:sticky;top:0;background:rgba(3,8,16,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--b2);padding:14px 20px;display:flex;align-items:center;gap:12px;z-index:5}
+.dp-back{width:32px;height:32px;border-radius:9px;background:var(--bg3);border:1px solid var(--b2);color:var(--t2);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.dp-back:hover{border-color:var(--t1);color:var(--t1)}
+.dp-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.dp-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:-.3px}
+.dp-sub{font-size:11px;color:var(--t2)}
+.dp-body{padding:20px}
+.dp-section{margin-bottom:20px}
+.dp-section-title{font-size:10px;font-weight:700;color:var(--t2);letter-spacing:1px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.dp-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b);font-size:12px}
+.dp-row span:first-child{color:var(--t2)}
+.dp-row span:last-child{font-family:'JetBrains Mono',monospace;font-weight:500}
+.dp-cta{width:100%;padding:14px;border-radius:13px;border:none;font-weight:800;font-size:14px;font-family:'Syne',sans-serif;letter-spacing:.3px;cursor:pointer;transition:all .2s;margin-top:4px}
+
+/* ── TRADING PAGE ── */
+.trade-layout{display:grid;grid-template-columns:1fr 280px;height:100%;overflow:hidden}
+.chart-area{border-right:1px solid var(--b2);display:flex;flex-direction:column;overflow:hidden}
+.chart-header{padding:10px 14px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.market-pill{padding:5px 10px;border-radius:8px;background:var(--bg3);border:1px solid var(--b2);font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer}
+.price-big{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--G)}
+.price-chg{font-size:11px;font-weight:700;color:var(--G);padding:2px 8px;background:var(--G)12;border-radius:100px}
+.chart-mock{flex:1;background:var(--bg3);position:relative;overflow:hidden}
+.chart-bars{display:flex;align-items:flex-end;gap:1px;height:100%;padding:8px;opacity:.7}
+.order-panel{padding:14px;overflow-y:auto}
+.op-tabs{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:10px;margin-bottom:12px}
+.op-tab{flex:1;padding:7px;text-align:center;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--t2)}
+.op-tab.active-long{background:var(--G);color:#000}
+.op-tab.active-short{background:var(--R);color:#fff}
+.form-label{font-size:9px;color:var(--t2);font-weight:700;margin-bottom:5px;letter-spacing:.5px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:9px;padding:9px 12px;font-size:15px;font-family:'JetBrains Mono',monospace;color:var(--t1);margin-bottom:8px}
+.form-input:focus{outline:none;border-color:var(--B)}
+.lev-row{display:flex;gap:5px;margin-bottom:10px}
+.lev-btn{flex:1;padding:6px;border-radius:7px;background:var(--bg3);border:1px solid var(--b2);color:var(--t2);font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'JetBrains Mono',monospace}
+.lev-btn.on,.lev-btn:hover{background:var(--B)20;border-color:var(--B)50;color:var(--B)}
+.stat-row{display:flex;justify-content:space-between;font-size:10px;padding:4px 0;border-bottom:1px solid var(--b3)}
+.stat-row span:first-child{color:var(--t2)}
+.stat-row span:last-child{font-family:'JetBrains Mono',monospace}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .mobile-tabs{display:flex}
+  .content{padding:14px 14px calc(14px + var(--tab-h))}
+  .trade-layout{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .chart-area{border-right:none;border-bottom:1px solid var(--b2)}
+  .dh-stats{gap:12px}
+  .quick-grid{grid-template-columns:repeat(4,1fr)}
+  .feature-grid{grid-template-columns:1fr 1fr}
+  .topbar .network-badge{display:none}
+}
+@media(min-width:769px){
+  .mobile-tabs{display:none!important}
+}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.anim{animation:fadeUp .25s ease both}
+.anim-d1{animation-delay:.05s}
+.anim-d2{animation-delay:.1s}
+.anim-d3{animation-delay:.15s}
+.anim-d4{animation-delay:.2s}
+
+/* Tag pill */
+.tpill{display:inline-block;padding:2px 8px;border-radius:100px;font-size:8px;font-weight:700;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ═══════════════════════════════════════════ SIDEBAR ═══════════════════ -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="topbar-logo" id="sidebar-logo">
+      <div class="lm">W</div>
+      <span id="logo-text">Wikicious</span>
+    </div>
+    <button class="collapse-btn" onclick="toggleSidebar()" id="collapse-btn">‹</button>
+  </div>
+
+  <div class="sidebar-scroll" id="sidebar-nav">
+    <!-- MAIN -->
+    <div class="nav-section">
+      <div class="nav-section-label">MAIN</div>
+      <div class="nav-item active" onclick="switchPage('discover')">
+        <div class="nav-icon-wrap">🧭</div>
+        <span class="nav-label">Discover</span>
+        <span class="nav-badge new-b">ALL</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('trade')">
+        <div class="nav-icon-wrap">📈</div>
+        <span class="nav-label">Trade</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('portfolio')">
+        <div class="nav-icon-wrap">💼</div>
+        <span class="nav-label">Portfolio</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('markets')">
+        <div class="nav-icon-wrap">🌐</div>
+        <span class="nav-label">Markets</span>
+        <span class="nav-badge" style="background:var(--B)18;color:var(--B);border:1px solid var(--B)30">295</span>
+      </div>
+    </div>
+
+    <!-- EARN -->
+    <div class="nav-section">
+      <div class="nav-section-label">EARN</div>
+      <div class="nav-item" onclick="switchPage('earn')">
+        <div class="nav-icon-wrap">💰</div>
+        <span class="nav-label">Earn Hub</span>
+        <span class="nav-badge earn-b">7 ways</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('staking')">
+        <div class="nav-icon-wrap">🔒</div>
+        <span class="nav-label">Staking</span>
+        <span class="nav-badge earn-b">18.5%</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('vaults')">
+        <div class="nav-icon-wrap">🏛</div>
+        <span class="nav-label">Vault Market</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('lending')">
+        <div class="nav-icon-wrap">🏦</div>
+        <span class="nav-label">Lending</span>
+      </div>
+    </div>
+
+    <!-- TRADE -->
+    <div class="nav-section">
+      <div class="nav-section-label">TRADE</div>
+      <div class="nav-item" onclick="switchPage('perp')">
+        <div class="nav-icon-wrap">⚡</div>
+        <span class="nav-label">Perpetuals</span>
+        <span class="nav-badge hot-b">1000×</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('spot')">
+        <div class="nav-icon-wrap">🔄</div>
+        <span class="nav-label">Spot & Swap</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('forex')">
+        <div class="nav-icon-wrap">💱</div>
+        <span class="nav-label">Forex</span>
+        <span class="nav-badge hot-b">2000×</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('darkpool')">
+        <div class="nav-icon-wrap">🌑</div>
+        <span class="nav-label">Dark Pool</span>
+        <span class="nav-badge new-b">NEW</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('options')">
+        <div class="nav-icon-wrap">🎯</div>
+        <span class="nav-label">Options</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('otc')">
+        <div class="nav-icon-wrap">🤝</div>
+        <span class="nav-label">OTC Desk</span>
+      </div>
+    </div>
+
+    <!-- BOTS & COPY -->
+    <div class="nav-section">
+      <div class="nav-section-label">AUTOMATE</div>
+      <div class="nav-item" onclick="switchPage('bots')">
+        <div class="nav-icon-wrap">🤖</div>
+        <span class="nav-label">Trading Bots</span>
+        <span class="nav-badge new-b">4 strats</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('copy')">
+        <div class="nav-icon-wrap">👥</div>
+        <span class="nav-label">Copy Trading</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('conditional')">
+        <div class="nav-icon-wrap">⚙️</div>
+        <span class="nav-label">Strategy Orders</span>
+        <span class="nav-badge new-b">NEW</span>
+      </div>
+    </div>
+
+    <!-- PROP -->
+    <div class="nav-section">
+      <div class="nav-section-label">PROP TRADING</div>
+      <div class="nav-item" onclick="switchPage('prop')">
+        <div class="nav-icon-wrap">🏆</div>
+        <span class="nav-label">Challenge</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('funded')">
+        <div class="nav-icon-wrap">💵</div>
+        <span class="nav-label">Funded Account</span>
+      </div>
+    </div>
+
+    <!-- GROW -->
+    <div class="nav-section">
+      <div class="nav-section-label">GROW</div>
+      <div class="nav-item" onclick="switchPage('affiliate')">
+        <div class="nav-icon-wrap">🎁</div>
+        <span class="nav-label">Affiliate</span>
+        <span class="nav-badge earn-b">45%</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('leaderboard')">
+        <div class="nav-icon-wrap">🏅</div>
+        <span class="nav-label">Leaderboard</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('season')">
+        <div class="nav-icon-wrap">⭐</div>
+        <span class="nav-label">Season XP</span>
+        <span class="nav-badge earn-b">S1</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('launch')">
+        <div class="nav-icon-wrap">🚀</div>
+        <span class="nav-label">Launchpad</span>
+      </div>
+    </div>
+
+    <!-- WALLET -->
+    <div class="nav-section">
+      <div class="nav-section-label">WALLET</div>
+      <div class="nav-item" onclick="switchPage('wallet')">
+        <div class="nav-icon-wrap">💳</div>
+        <span class="nav-label">My Wallet</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('bridge')">
+        <div class="nav-icon-wrap">🌉</div>
+        <span class="nav-label">Bridge</span>
+        <span class="nav-badge" style="background:var(--V)18;color:var(--V);border:1px solid var(--V)30">7 chains</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('sub')">
+        <div class="nav-icon-wrap">📂</div>
+        <span class="nav-label">Sub-Accounts</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('api')">
+        <div class="nav-icon-wrap">⚡</div>
+        <span class="nav-label">API Access</span>
+      </div>
+    </div>
+
+    <!-- PROTOCOL -->
+    <div class="nav-section">
+      <div class="nav-section-label">PROTOCOL</div>
+      <div class="nav-item" onclick="switchPage('analytics')">
+        <div class="nav-icon-wrap">📊</div>
+        <span class="nav-label">Analytics</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('governance')">
+        <div class="nav-icon-wrap">🗳</div>
+        <span class="nav-label">Governance</span>
+      </div>
+      <div class="nav-item" onclick="switchPage('nft')">
+        <div class="nav-icon-wrap">💎</div>
+        <span class="nav-label">Revenue NFT</span>
+        <span class="nav-badge earn-b">$500</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="user-avatar">🦊</div>
+      <div id="user-info">
+        <div class="user-name">0xF4a2...3b91</div>
+        <div class="user-sub">PRO · Season S1 · Rank #142</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ MAIN ═══════════════════════ -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo" id="mobile-logo">
+      <div class="lm">W</div>
+    </div>
+    <div class="search-wrap" id="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search" placeholder="Search features, markets, strategies..." oninput="doSearch(this.value)" onfocus="showSearch()" onblur="setTimeout(hideSearch,200)">
+      <div class="search-results" id="search-results" style="display:none"></div>
+    </div>
+    <div class="topbar-right">
+      <div class="network-badge">Arbitrum One</div>
+      <button class="notif-btn" onclick="alert('Notifications: Position health 72% — BTC Long 10×')">
+        🔔<div class="notif-dot"></div>
+      </button>
+      <button class="wallet-btn" onclick="alert('Connect wallet — MetaMask, WalletConnect, Coinbase, Rainbow')">
+        <span>⬡</span> Connect
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGES -->
+  <div class="content" id="content">
+    <!-- Rendered by JS -->
+  </div>
+
+  <!-- FEATURE DETAIL PANEL -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="dp-header">
+      <button class="dp-back" onclick="closeDetail()">‹</button>
+      <div class="dp-icon" id="dp-icon"></div>
+      <div>
+        <div class="dp-title" id="dp-title"></div>
+        <div class="dp-sub" id="dp-sub"></div>
+      </div>
+    </div>
+    <div class="dp-body" id="dp-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ MOBILE TABS ════════════════ -->
+<div class="mobile-tabs">
+  <div class="mtab active" onclick="switchPage('discover',this)">
+    <div class="mtab-icon">🧭</div>
+    <div class="mtab-label">Explore</div>
+  </div>
+  <div class="mtab" onclick="switchPage('trade',this)">
+    <div class="mtab-icon">📈</div>
+    <div class="mtab-label">Trade</div>
+  </div>
+  <div class="mtab" onclick="switchPage('earn',this)">
+    <div class="mtab-icon">💰</div>
+    <div class="mtab-label">Earn</div>
+    <div class="mtab-badge">18%</div>
+  </div>
+  <div class="mtab" onclick="switchPage('bots',this)">
+    <div class="mtab-icon">🤖</div>
+    <div class="mtab-label">Bots</div>
+  </div>
+  <div class="mtab" onclick="switchPage('prop',this)">
+    <div class="mtab-icon">🏆</div>
+    <div class="mtab-label">Prop</div>
+  </div>
+  <div class="mtab" onclick="switchPage('wallet',this)">
+    <div class="mtab-icon">💼</div>
+    <div class="mtab-label">Wallet</div>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const FEATURES = [
+  // Trading
+  {id:'perp',icon:'⚡',name:'Perpetuals',cat:'Trade',desc:'Up to 1000× leverage on 241 crypto markets',tag:'1000×',c:'#00F0A8',page:'perp'},
+  {id:'forex',icon:'💱',name:'Forex & Metals',cat:'Trade',desc:'EUR/USD, XAU/USD at up to 2000× leverage',tag:'2000×',c:'#FFB020',page:'forex'},
+  {id:'spot',icon:'🔄',name:'Spot & Swap',cat:'Trade',desc:'AMM swap + order book, any token pair',tag:'INSTANT',c:'#0075FF',page:'spot'},
+  {id:'darkpool',icon:'🌑',name:'Dark Pool',cat:'Trade',desc:'Private large trades. No front-running.',tag:'NEW',c:'#7C4FFF',page:'darkpool'},
+  {id:'options',icon:'🎯',name:'Options Vault',cat:'Trade',desc:'On-chain options, 0.5% fee per leg',tag:'OPTIONS',c:'#FF5C35',page:'options'},
+  {id:'index',icon:'📦',name:'Index Perps',cat:'Trade',desc:'DeFi, Metaverse, L1 index perpetuals',tag:'INDEX',c:'#00C8FF',page:'index'},
+  {id:'otc',icon:'🤝',name:'OTC Desk',cat:'Trade',desc:'Large blocks off order book, best price',tag:'OTC',c:'#FFB020',page:'otc'},
+  {id:'trailing',icon:'🎯',name:'Trailing Stop',cat:'Trade',desc:'Auto-follows price up, protects gains',tag:'ORDERS',c:'#00C8FF',page:'trailing'},
+  {id:'guaranteed',icon:'🛡',name:'Guaranteed Stop',cat:'Trade',desc:'Pay 0.5% premium — zero slippage exit',tag:'NEW',c:'#00F0A8',page:'guaranteed'},
+  {id:'twamm',icon:'🐋',name:'TWAMM',cat:'Trade',desc:'Split $5M across 1000 blocks, zero impact',tag:'WHALE',c:'#00F0A8',page:'twamm'},
+  {id:'conditional',icon:'⚙️',name:'Strategy Orders',cat:'Trade',desc:'If BTC > $70K → open ETH long 5×',tag:'NEW',c:'#00F0A8',page:'conditional'},
+  {id:'prediction',icon:'🔮',name:'Prediction Markets',cat:'Trade',desc:'Binary yes/no markets on any event',tag:'PRED',c:'#7C4FFF',page:'prediction'},
+  // Earn
+  {id:'staking',icon:'🔒',name:'veWIK Staking',cat:'Earn',desc:'Lock WIK → earn 18.5% APR in USDC',tag:'18.5%',c:'#0075FF',page:'staking'},
+  {id:'backstop',icon:'🛡',name:'Backstop Vault',cat:'Earn',desc:'15-25% APY · 7-day exit · Audited',tag:'25% APY',c:'#FFB020',page:'backstop'},
+  {id:'deltaneutral',icon:'⚖️',name:'Delta-Neutral LP',cat:'Earn',desc:'~18% APY with zero price direction risk',tag:'LOW RISK',c:'#00C8FF',page:'deltaneutral'},
+  {id:'lending',icon:'🏦',name:'Lending',cat:'Earn',desc:'Supply USDC/ETH/BTC, earn 4-8% APY',tag:'INSTANT',c:'#0075FF',page:'lending'},
+  {id:'structprod',icon:'🏛',name:'Structured Products',cat:'Earn',desc:'Covered call vaults, 8-52% APY weekly',tag:'NEW',c:'#7C4FFF',page:'structprod'},
+  {id:'levyield',icon:'🌀',name:'Leveraged Yield',cat:'Earn',desc:'ETH 3× loop, USDC stable loop vaults',tag:'NEW',c:'#FF5C35',page:'levyield'},
+  {id:'realdyield',icon:'💵',name:'Real Yield LP',cat:'Earn',desc:'100% USDC trading fees to LPs',tag:'NEW',c:'#00F0A8',page:'realyield'},
+  {id:'insurance',icon:'🔐',name:'Position Insurance',cat:'Earn',desc:'Underwrite trader positions, earn premium',tag:'YIELD',c:'#FFB020',page:'insurance'},
+  {id:'autocomp',icon:'🔄',name:'Auto-Compounder',cat:'Earn',desc:'veWIK grows automatically every week',tag:'AUTO',c:'#7C4FFF',page:'autocomp'},
+  // Bots
+  {id:'gridb',icon:'🤖',name:'Grid Bot',cat:'Bots',desc:'60-70% win rate, earns on every oscillation',tag:'AUTO',c:'#00F0A8',page:'bots'},
+  {id:'fundingb',icon:'⚡',name:'Funding Arb Bot',cat:'Bots',desc:'80-90% capture rate, delta neutral',tag:'LOW RISK',c:'#FFB020',page:'bots'},
+  {id:'trendb',icon:'📊',name:'Trend Bot',cat:'Bots',desc:'EMA crossover, 3:1 reward/risk ratio',tag:'TREND',c:'#0075FF',page:'bots'},
+  {id:'meanb',icon:'↩️',name:'Mean Reversion Bot',cat:'Bots',desc:'63% win rate, RSI + Bollinger strategy',tag:'RANGE',c:'#7C4FFF',page:'bots'},
+  {id:'copy',icon:'👥',name:'Copy Trading',cat:'Bots',desc:'Follow top traders, auto-mirror positions',tag:'SOCIAL',c:'#FF5C35',page:'copy'},
+  // Prop
+  {id:'prop',icon:'🏆',name:'Prop Challenge',cat:'Prop',desc:'2-phase eval → trade up to $200K funded',tag:'UP TO $200K',c:'#FFB020',page:'prop'},
+  {id:'funded',icon:'💵',name:'Funded Account',cat:'Prop',desc:'80-90% profit split, 10× max leverage',tag:'REAL CAPITAL',c:'#00F0A8',page:'funded'},
+  {id:'liqprot',icon:'🛡',name:'Liq Protection',cat:'Prop',desc:'$20-100/mo subscription, keeper auto-adds margin',tag:'NEW',c:'#00F0A8',page:'liqprot'},
+  // Growth
+  {id:'affiliate',icon:'🎁',name:'Affiliate Program',cat:'Growth',desc:'Earn 20-45% of all fees from your referrals',tag:'45% SHARE',c:'#00F0A8',page:'affiliate'},
+  {id:'season',icon:'⭐',name:'Season XP',cat:'Growth',desc:'Earn points, 2× streak multiplier, win WIK',tag:'SEASON 1',c:'#FFB020',page:'season'},
+  {id:'leaderboard',icon:'🏅',name:'Leaderboard',cat:'Growth',desc:'Top traders by P&L, return %, win rate',tag:'PUBLIC',c:'#00F0A8',page:'leaderboard'},
+  {id:'revnft',icon:'💎',name:'Revenue Share NFT',cat:'Growth',desc:'1,000 NFTs earning 0.01% of all fees forever',tag:'$500',c:'#FFB020',page:'nft'},
+  {id:'eliteaff',icon:'👑',name:'Elite Affiliate NFT',cat:'Growth',desc:'Top 100 affiliates, 45% share, monthly prizes',tag:'TOP 100',c:'#FF5C35',page:'affiliate'},
+  // Wallet
+  {id:'multicol',icon:'💰',name:'Multi-Collateral',cat:'Wallet',desc:'Use BTC/ETH/ARB as trading margin',tag:'NEW',c:'#00F0A8',page:'multicol'},
+  {id:'subacct',icon:'📂',name:'Sub-Accounts',cat:'Wallet',desc:'Up to 10 isolated sub-accounts per wallet',tag:'NEW',c:'#0075FF',page:'sub'},
+  {id:'bridge',icon:'🌉',name:'7-Chain Bridge',cat:'Wallet',desc:'Move assets across 7 chains via LayerZero V2',tag:'7 CHAINS',c:'#7C4FFF',page:'bridge'},
+  {id:'gasless',icon:'⛽',name:'Gasless Trading',cat:'Wallet',desc:'ERC-4337 paymaster, trade with zero ETH',tag:'AA',c:'#00F0A8',page:'gasless'},
+  {id:'fiat',icon:'💳',name:'Fiat On-Ramp',cat:'Wallet',desc:'Buy USDC with card via MoonPay/Transak',tag:'CARD',c:'#0075FF',page:'fiat'},
+  {id:'telegram',icon:'📱',name:'Telegram Bot',cat:'Wallet',desc:'/long BTC 1000 10x — trade from chat',tag:'NEW',c:'#0075FF',page:'telegram'},
+  {id:'api',icon:'⚡',name:'API Gateway',cat:'Wallet',desc:'Pro $50/mo · Institutional $500/mo',tag:'PRO',c:'#00C8FF',page:'api'},
+  // Protocol
+  {id:'analytics',icon:'📊',name:'Analytics',cat:'Protocol',desc:'DeFi Llama compatible · All stats on-chain',tag:'PUBLIC',c:'#00F0A8',page:'analytics'},
+  {id:'governance',icon:'🗳',name:'Governance',cat:'Protocol',desc:'veWIK voting · 48h timelock · AI guardrails',tag:'DAO',c:'#7C4FFF',page:'governance'},
+  {id:'vestmkt',icon:'🔓',name:'Vesting Market',cat:'Protocol',desc:'Buy/sell locked WIK tokens at a discount',tag:'NEW',c:'#FFB020',page:'vestmkt'},
+  {id:'solvency',icon:'🔏',name:'Proof of Solvency',cat:'Protocol',desc:'Merkle tree proofs published every 24 hours',tag:'TRUST',c:'#00F0A8',page:'solvency'},
+];
+
+const QUICK_ACTIONS = [
+  {icon:'📈',title:'Trade BTC',sub:'1000× perp',page:'perp',c:'#00F0A8'},
+  {icon:'💰',title:'Earn Yield',sub:'Up to 25%',page:'earn',c:'#FFB020'},
+  {icon:'🏆',title:'Prop Challenge',sub:'Win $200K',page:'prop',c:'#FFB020'},
+  {icon:'🤖',title:'Start Bot',sub:'24/7 auto',page:'bots',c:'#0075FF'},
+  {icon:'🎁',title:'Refer & Earn',sub:'Up to 45%',page:'affiliate',c:'#00F0A8'},
+  {icon:'🌉',title:'Bridge',sub:'7 chains',page:'bridge',c:'#7C4FFF'},
+  {icon:'💱',title:'Forex 2000×',sub:'EUR/USD',page:'forex',c:'#FFB020'},
+  {icon:'🌑',title:'Dark Pool',sub:'Private',page:'darkpool',c:'#7C4FFF'},
+];
+
+// ── SIDEBAR TOGGLE ────────────────────────────────────────────────────────────
+let sidebarCollapsed = false;
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('collapse-btn');
+  const logoText = document.getElementById('logo-text');
+  const userInfo = document.getElementById('user-info');
+  sb.classList.toggle('collapsed', sidebarCollapsed);
+  btn.textContent = sidebarCollapsed ? '›' : '‹';
+  logoText.style.display = sidebarCollapsed ? 'none' : '';
+  userInfo.style.display = sidebarCollapsed ? 'none' : '';
+}
+
+// ── PAGE ROUTING ──────────────────────────────────────────────────────────────
+let currentPage = 'discover';
+function switchPage(page, mobileTab) {
+  currentPage = page;
+  // Update sidebar active state
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(el => el.classList.remove('active'));
+  if (mobileTab) mobileTab.classList.add('active');
+
+  // Close detail panel
+  document.getElementById('detail-panel').classList.remove('open');
+
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+  content.scrollTop = 0;
+
+  const pages = {
+    discover:    renderDiscover,
+    trade:       renderTrade,
+    earn:        renderEarnHub,
+    bots:        renderBots,
+    prop:        renderProp,
+    portfolio:   renderPortfolio,
+    markets:     renderMarkets,
+    staking:     () => openDetail('staking'),
+    vaults:      () => openDetail('structprod'),
+    lending:     () => openDetail('lending'),
+    perp:        renderTrade,
+    spot:        () => openDetail('spot'),
+    forex:       () => openDetail('forex'),
+    darkpool:    () => openDetail('darkpool'),
+    options:     () => openDetail('options'),
+    otc:         () => openDetail('otc'),
+    copy:        () => openDetail('copy'),
+    conditional: () => openDetail('conditional'),
+    funded:      () => openDetail('funded'),
+    liqprot:     () => openDetail('liqprot'),
+    affiliate:   () => openDetail('affiliate'),
+    leaderboard: () => openDetail('leaderboard'),
+    season:      () => openDetail('season'),
+    launch:      () => openDetail('index'),
+    wallet:      renderWallet,
+    bridge:      () => openDetail('bridge'),
+    sub:         () => openDetail('subacct'),
+    api:         () => openDetail('api'),
+    analytics:   () => openDetail('analytics'),
+    governance:  () => openDetail('governance'),
+    nft:         () => openDetail('revnft'),
+    multicol:    () => openDetail('multicol'),
+    telegram:    () => openDetail('telegram'),
+    vestmkt:     () => openDetail('vestmkt'),
+    solvency:    () => openDetail('solvency'),
+    gasless:     () => openDetail('gasless'),
+    fiat:        () => openDetail('fiat'),
+    backstop:    () => openDetail('backstop'),
+    deltaneutral:() => openDetail('deltaneutral'),
+    realyield:   () => openDetail('realdyield'),
+    levyield:    () => openDetail('levyield'),
+    structprod:  () => openDetail('structprod'),
+    insurance:   () => openDetail('insurance'),
+    autocomp:    () => openDetail('autocomp'),
+    index:       () => openDetail('index'),
+    trailing:    () => openDetail('trailing'),
+    guaranteed:  () => openDetail('guaranteed'),
+    twamm:       () => openDetail('twamm'),
+    prediction:  () => openDetail('prediction'),
+    gridb:       () => openDetail('gridb'),
+    fundingb:    () => openDetail('fundingb'),
+    trendb:      () => openDetail('trendb'),
+    meanb:       () => openDetail('meanb'),
+  };
+  (pages[page] || renderDiscover)();
+}
+
+// ── DISCOVER PAGE ─────────────────────────────────────────────────────────────
+function renderDiscover() {
+  const cats = ['Trade','Earn','Bots','Prop','Growth','Wallet','Protocol'];
+  const html = `
+    <div class="anim">
+      <div class="discover-hero">
+        <div class="dh-title">Welcome to Wikicious V5</div>
+        <div class="dh-sub">The most feature-complete DEX on Arbitrum. 129 smart contracts, 295 markets, every yield strategy in DeFi.</div>
+        <div class="dh-stats">
+          <div class="dh-stat"><div class="dh-stat-v">$0</div><div class="dh-stat-l">START WITH</div></div>
+          <div class="dh-stat"><div class="dh-stat-v">129</div><div class="dh-stat-l">CONTRACTS</div></div>
+          <div class="dh-stat"><div class="dh-stat-v">295</div><div class="dh-stat-l">MARKETS</div></div>
+          <div class="dh-stat"><div class="dh-stat-v">25%</div><div class="dh-stat-l">MAX APY</div></div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">⚡ Quick Actions</div>
+      </div>
+      <div class="quick-grid anim-d1">
+        ${QUICK_ACTIONS.map(q=>`
+          <div class="qa-card" onclick="switchPage('${q.page}')">
+            <div class="qa-icon">${q.icon}</div>
+            <div class="qa-title">${q.title}</div>
+            <div class="qa-sub" style="color:${q.c}">${q.sub}</div>
+          </div>`).join('')}
+      </div>
+
+      ${cats.map((cat,ci) => {
+        const feats = FEATURES.filter(f=>f.cat===cat);
+        return `
+          <div class="anim" style="animation-delay:${.05*ci}s">
+            <div class="section-header">
+              <div class="section-title">${catIcon(cat)} ${cat}</div>
+              <button class="section-see-all">See all ${feats.length} →</button>
+            </div>
+            <div class="feature-grid">
+              ${feats.slice(0,6).map(f=>`
+                <div class="feat-card" onclick="openDetail('${f.id}')" style="border-color:${f.c}15">
+                  <div class="feat-icon" style="background:${f.c}18;border:1px solid ${f.c}30">${f.icon}</div>
+                  <div>
+                    <div class="feat-name">${f.name}</div>
+                    <div class="feat-desc">${f.desc}</div>
+                    <div class="feat-tag tpill" style="background:${f.c}18;border:1px solid ${f.c}30;color:${f.c}">${f.tag}</div>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+  document.getElementById('content').innerHTML = html;
+}
+
+function catIcon(c){return{Trade:'📈',Earn:'💰',Bots:'🤖',Prop:'🏆',Growth:'🎁',Wallet:'💼',Protocol:'📊'}[c]||'⭐'}
+
+// ── FEATURE DETAIL PANEL ──────────────────────────────────────────────────────
+const DETAIL_DATA = {
+  perp:{title:'Perpetuals — Up to 1000×',sub:'241 crypto markets · Market/Limit/Stop/TP/SL · ADL protection',rows:[['Max leverage','1000×'],['Markets','241 crypto'],['Funding','Dynamic 0→5× tier'],['Route','Hybrid — GMX/Uniswap day 1'],['ADL','Auto-deleverage queue'],['Portfolio margin','Cross-margin ✅']],cta:'Open a Position',ctaC:'#00F0A8'},
+  forex:{title:'Forex 2000× · Metals · Commodities',sub:'30 forex · 4 metals · 8 commodities · 10 indices · Pyth+Chainlink',rows:[['Forex max leverage','2000×'],['Metals max','1000×'],['Commodities','500×'],['Spreads','As tight as 0.1 pips'],['24/7','Yes — crypto never sleeps'],['Pyth feed','Sub-second updates']],cta:'Trade Forex',ctaC:'#FFB020'},
+  staking:{title:'veWIK Staking',sub:'Lock WIK → earn USDC fees + governance + boost multiplier',rows:[['Current APR','18.5%'],['Lock periods','1mo / 6mo / 1yr / 4yr'],['4yr lock gets','Max veWIK + 2.5× LP boost'],['Weekly USDC','From 32% of protocol fees'],['Gauge bribes','$28,400 this epoch'],['Auto-compound','Optional — weekly keeper']],cta:'Lock WIK',ctaC:'#0075FF'},
+  prop:{title:'Prop Trading Challenge',sub:'2-phase evaluation → funded account up to $200K',rows:[['Phase 1 target','8% profit / 30 days / 100× max'],['Phase 2 target','5% profit / 60 days / 50× max'],['Balance reset','Phase 2 starts clean — proves skill'],['Consistency rule','No single day > 40% of profit'],['Profit split','80-90% to trader'],['Max funded','$200,000']],cta:'Buy Challenge',ctaC:'#FFB020'},
+  affiliate:{title:'Affiliate Program',sub:'4 tiers · 20-45% revenue share · Instant on-chain payments',rows:[['Bronze (entry)','20% share'],['Silver ($100K vol)','25% share'],['Gold ($1M vol)','30% share'],['Diamond ($10M vol)','40% share'],['Elite NFT','45% share (top 100 only)'],['Trader rebate','10-20% off their fees']],cta:'Get Referral Link',ctaC:'#00F0A8'},
+  darkpool:{title:'Dark Pool — Private Large Trades',sub:'Commit-reveal · $50K minimum · 0.15% fee · No front-running',rows:[['Minimum order','$50,000 USDC'],['Taker fee','0.15%'],['Maker rebate','0.02%'],['Phase 1','Submit order hash (hidden)'],['Phase 2','Reveal within 10 blocks'],['Phase 3','Matched at midpoint price']],cta:'Place Dark Order',ctaC:'#7C4FFF'},
+  bots:{title:'4 Automated Trading Bots',sub:'WikiBotVault · Grid / Funding Arb / Trend / Mean Reversion',rows:[['Grid Bot win rate','60-70% per cycle'],['Funding Arb capture','80-90% of positive periods'],['Trend Bot RR','3:1 reward/risk (47% WR)'],['Mean Revert WR','63% in ranging markets'],['Performance fee','20% of profits only'],['Management fee','2% per year on AUM']],cta:'Start a Bot',ctaC:'#00F0A8'},
+  backstop:{title:'Backstop Vault',sub:'15-25% APY · 7-day exit · Absorbs liquidation gaps',rows:[['Current APY','15-25%'],['Exit delay','7 days (request anytime)'],['Risk','Absorbs liquidation shortfalls'],['When markets are good','LPs earn max APY'],['TVL cap','Stage-based rollout'],['Insurance','WikiInsuranceFundYield']],cta:'Deposit to Backstop',ctaC:'#FFB020'},
+  lending:{title:'WikiLending',sub:'Supply USDC/ETH/BTC · Earn 4-8% APY · Instant exit',rows:[['USDC supply APY','4-8%'],['ETH supply APY','3-6%'],['BTC supply APY','2-4%'],['Instant exit','Yes — no lockup'],['Used for','Leveraged yield, prop pool, margin loans'],['Safety','Overcollateralised borrowing']],cta:'Supply to Lending',ctaC:'#0075FF'},
+  copy:{title:'Copy Trading',sub:'Follow top traders · Auto-mirror · 20% profit share',rows:[['Top trader return','CryptoWhale_99 +284%'],['Min to follow','$100 USDC'],['Your share','80% of profits'],['Leader share','20% of your profits'],['Auto-mirror','Every trade replicated on-chain'],['Stop-loss','Set your own max loss']],cta:'Browse Traders',ctaC:'#FF5C35'},
+  multicol:{title:'Multi-Collateral Margin',sub:'Post BTC/ETH/ARB as trading margin without converting',rows:[['USDC LTV','100%'],['WETH LTV','85%'],['WBTC LTV','80%'],['ARB LTV','70%'],['Health factor','Must stay above 1.0×'],['Auto-liquidation','Keeper bot monitors 24/7']],cta:'Add Collateral',ctaC:'#00F0A8'},
+  subacct:{title:'Sub-Accounts',sub:'Up to 10 isolated sub-accounts per wallet',rows:[['Max sub-accounts','10 per wallet'],['Isolation','Each has separate margin'],['Per-sub limits','Leverage cap, daily loss, size'],['Labels','"Scalping", "Swing", "Bot" etc'],['Transfer','Move USDC between subs instantly'],['Pause','Pause any sub without closing']],cta:'Create Sub-Account',ctaC:'#0075FF'},
+  bridge:{title:'7-Chain Bridge',sub:'Arbitrum · Ethereum · Base · Optimism · Polygon · BSC · Avalanche',rows:[['Technology','LayerZero V2'],['Chains','7 supported'],['Fee','0.1% of bridged amount'],['Time','~2-5 minutes'],['Supported assets','USDC, ETH, BTC, WIK'],['Smart routing','Best rate auto-selected']],cta:'Bridge Now',ctaC:'#7C4FFF'},
+  api:{title:'API Gateway',sub:'Programmatic trading · Rate limits · Per-key permissions',rows:[['Free tier','100 orders/day · $100K vol'],['Pro ($50/mo)','10K orders/day · $10M vol'],['Institutional ($500/mo)','Unlimited · Priority'],['Key expiry','Configurable'],['Withdrawal','Disabled by default (security)'],['Format','REST + WebSocket']],cta:'Get API Key',ctaC:'#00C8FF'},
+  telegram:{title:'Telegram Trading Bot',sub:'Link wallet once → trade from @WikiciousBot',rows:[['/long BTC 1000 10x','Opens BTC long $1K at 10×'],['/short ETH 500 5x','Opens ETH short $500 at 5×'],['/close 1','Closes position #1'],['/balance','Shows wallet + P&L'],['/alerts 70000','BTC price alert at $70K'],['/positions','All open positions']],cta:'Open Telegram Bot',ctaC:'#0075FF'},
+  analytics:{title:'On-Chain Analytics',sub:'Public stats · DeFi Llama compatible · Revenue dashboard',rows:[['24h volume','$48.2M (live on-chain)'],['24h fees','$33,740'],['Total TVL','$124M'],['Unique traders','8,420'],['DeFi Llama','getTVL() compatible'],['Token Terminal','getProtocolRevenue() compatible']],cta:'View Analytics',ctaC:'#00F0A8'},
+  revnft:{title:'Revenue Share NFT',sub:'1,000 NFTs · 0.01% of all fees forever · Transferable ERC-721',rows:[['Supply','1,000 NFTs (total ever)'],['Mint price','$500 USDC'],['Your share','0.01% of all fees forever'],['At $10M daily vol','~$21/month per NFT'],['At $50M daily vol','~$105/month per NFT'],['Transferable','Yes — sell on secondary market']],cta:'Mint NFT — $500',ctaC:'#FFB020'},
+  season:{title:'Season XP — Season 1',sub:'Earn points · 2× streak · Win WIK tokens at season end',rows:[['Season duration','90 days'],['Volume XP','1 XP per $100 notional'],['Daily bonus','10 XP per active day'],['Streak 7+ days','1.5× multiplier'],['Streak 30+ days','2.0× multiplier'],['Prop pass','2,000 XP bonus']],cta:'View My XP',ctaC:'#FFB020'},
+  vestmkt:{title:'Vesting Token Marketplace',sub:'Buy locked WIK at discount · Sellers get instant liquidity',rows:[['Discount range','5-50% below market price'],['Protocol fee','2% per transaction'],['Buyer gets','WIK on unlock from vesting contract'],['Seller gets','USDC now — no waiting for unlock'],['Transferable','Vesting schedule NFT transferred'],['Listing expiry','Configurable by seller']],cta:'Browse Listings',ctaC:'#FFB020'},
+  solvency:{title:'Proof of Solvency',sub:'Merkle tree · Published every 24h · Verify your balance',rows:[['Current ratio','117.2% (assets > liabilities)'],['Frequency','Every 24 hours on-chain'],['Verification','Any wallet can verify their balance'],['Storage','IPFS balance list + Merkle root on-chain'],['Last published','2 hours ago'],['Next update','In 22 hours']],cta:'Verify My Balance',ctaC:'#00F0A8'},
+  liqprot:{title:'Liquidation Protection',sub:'Monthly subscription · Keeper auto-adds margin · Never liquidated',rows:[['Basic plan','$20/month · $500 per add · $10K positions'],['Pro plan','$50/month · $5K per add · $100K positions'],['Elite plan','$100/month · $50K per add · Unlimited'],['Trigger','Health below 15% (Elite: 20%)'],['Keeper fee','0.1% of amount added'],['Cancel','Anytime']],cta:'Subscribe Now',ctaC:'#00F0A8'},
+  governance:{title:'DAO Governance',sub:'veWIK voting · 48h timelock · AI guardrails · On-chain',rows:[['Voting power','1 veWIK = 1 vote'],['Proposal threshold','100,000 veWIK to propose'],['Timelock','48 hours on all changes'],['AI guardrails','Flags dangerous proposals'],['Quorum','5% of veWIK supply'],['Emergency','Multisig 2-of-3 can pause only']],cta:'View Proposals',ctaC:'#7C4FFF'},
+};
+
+function openDetail(id) {
+  const f = FEATURES.find(x=>x.id===id);
+  const d = DETAIL_DATA[id];
+  if (!f) return;
+
+  document.getElementById('dp-icon').innerHTML = f.icon;
+  document.getElementById('dp-icon').style.cssText = `background:${f.c}18;border:1px solid ${f.c}30;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0`;
+  document.getElementById('dp-title').textContent = d ? d.title : f.name;
+  document.getElementById('dp-sub').textContent   = d ? d.sub   : f.desc;
+
+  let bodyHtml = `
+    <div class="dp-section">
+      <div class="dp-section-title">OVERVIEW</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.7;padding:10px;background:var(--card);border-radius:10px;border:1px solid var(--b2)">
+        ${f.desc}. ${f.cat} feature — part of Wikicious V5.
+      </div>
+    </div>`;
+
+  if (d && d.rows) {
+    bodyHtml += `
+      <div class="dp-section">
+        <div class="dp-section-title">DETAILS</div>
+        ${d.rows.map(([k,v])=>`<div class="dp-row"><span>${k}</span><span style="color:${f.c}">${v}</span></div>`).join('')}
+      </div>`;
+  }
+
+  bodyHtml += `
+    <button class="dp-cta" style="background:${f.c};color:${f.c==='#FFB020'||f.c==='#00F0A8'?'#000':'#fff'}"
+      onclick="alert('${d?d.cta:'Use Feature'} — connect wallet to continue')">
+      ${d ? d.cta : 'Use ' + f.name} →
+    </button>
+    <button class="dp-cta" style="background:transparent;border:1px solid var(--b2);color:var(--t2);margin-top:8px"
+      onclick="closeDetail()">← Back to Discover</button>`;
+
+  document.getElementById('dp-body').innerHTML = bodyHtml;
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
+// ── TRADE PAGE ────────────────────────────────────────────────────────────────
+function renderTrade() {
+  document.getElementById('content').style.padding = '0';
+  document.getElementById('content').innerHTML = `
+    <div class="trade-layout" style="height:100%">
+      <div class="chart-area">
+        <div class="chart-header">
+          <div class="market-pill">BTC/USD Perp <span style="color:var(--t2);font-size:10px">▼</span></div>
+          <div class="price-big">$67,284</div>
+          <div class="price-chg">+2.14%</div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            ${['1H','4H','1D','1W'].map((t,i)=>`<button style="padding:4px 9px;border-radius:6px;background:${i===1?'var(--B)20':'var(--bg3)'};border:1px solid ${i===1?'var(--B)40':'var(--b2)'};color:${i===1?'var(--B)':'var(--t2)'};font-size:10px;font-weight:700;cursor:pointer">${t}</button>`).join('')}
+          </div>
+        </div>
+        <div class="chart-mock">
+          <div class="chart-bars">
+            ${Array.from({length:80},(_,i)=>{
+              const h=20+Math.abs(Math.sin(i*.4)*50+Math.cos(i*.7)*20);
+              const up=Math.sin(i*.3)>0;
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px">
+                <div style="width:1px;height:${Math.ceil(h*.2)}px;background:${up?'#00F0A880':'#FF2D5580'}"></div>
+                <div style="width:80%;height:${Math.ceil(h*.5)}px;background:${up?'#00F0A8CC':'#FF2D55CC'};border-radius:1px"></div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="position:absolute;bottom:8px;left:12px;right:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+            ${[['OI LONG','$84.2M','#00F0A8'],['OI SHORT','$62.1M','#FF2D55'],['FUND','0.042%','#FFB020'],['ADL','🟢 Safe','#00F0A8']].map(([l,v,c])=>`<div style="background:rgba(6,12,24,.85);border-radius:7px;padding:5px 8px;border:1px solid var(--b2)"><div style="font-size:7px;color:var(--t2);font-weight:700">${l}</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${c};margin-top:1px">${v}</div></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="order-panel">
+        <div class="op-tabs">
+          <div class="op-tab active-long" onclick="this.parentElement.querySelectorAll('.op-tab').forEach(x=>x.className='op-tab');this.className='op-tab active-long'">▲ Long</div>
+          <div class="op-tab" onclick="this.parentElement.querySelectorAll('.op-tab').forEach(x=>x.className='op-tab');this.className='op-tab active-short'">▼ Short</div>
+        </div>
+        <div class="form-label">AMOUNT (USDC)</div>
+        <input class="form-input" value="500" placeholder="0" type="number"/>
+        <div class="form-label">LEVERAGE</div>
+        <input type="range" min="1" max="100" value="20" style="width:100%;accent-color:var(--B);height:3px;margin-bottom:8px">
+        <div class="lev-row">
+          ${['5×','10×','20×','50×','100×'].map((l,i)=>`<button class="lev-btn${i===2?' on':''}">${l}</button>`).join('')}
+        </div>
+        <div class="stat-row"><span>Notional</span><span>$10,000</span></div>
+        <div class="stat-row"><span>Liq. Price</span><span style="color:var(--R)">$58,210</span></div>
+        <div class="stat-row"><span>Fee</span><span>$10.00</span></div>
+        <div class="stat-row"><span>Route</span><span style="color:var(--G)">Hybrid</span></div>
+        <button class="dp-cta" style="background:var(--G);color:#000;margin-top:12px" onclick="alert('Connect wallet to open position')">Open Long 20× →</button>
+        <div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:9px;border:1px solid var(--b2)">
+          <div style="font-size:9px;color:var(--t2);font-weight:700;margin-bottom:6px;font-family:'JetBrains Mono',monospace">ALSO TRY</div>
+          ${[['🎯 Trailing Stop','Set 5% trail'],['⚙️ Strategy Orders','If/then rules'],['🌑 Dark Pool','For $50K+ orders']].map(([n,d])=>`
+            <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--b3);cursor:pointer" onclick="openDetail('${n.includes('Trail')?'trailing':n.includes('Strategy')?'conditional':'darkpool'}')">
+              <span style="font-size:11px">${n.slice(0,2)}</span>
+              <div style="flex:1"><div style="font-size:10px;font-weight:600">${n.slice(2)}</div><div style="font-size:9px;color:var(--t2)">${d}</div></div>
+              <span style="color:var(--B);font-size:11px">›</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('content').style.padding = '0';
+}
+
+// ── EARN HUB ──────────────────────────────────────────────────────────────────
+function renderEarnHub() {
+  const ways = [
+    {icon:'🔒',name:'veWIK Staking',apy:'18.5%',risk:'LOW',lock:'1-4yr',c:'#0075FF'},
+    {icon:'🛡',name:'Backstop Vault',apy:'15-25%',risk:'MED',lock:'7-day',c:'#FFB020'},
+    {icon:'⚖️',name:'Delta-Neutral LP',apy:'~18%',risk:'LOW',lock:'7-day',c:'#00C8FF'},
+    {icon:'💵',name:'Real Yield LP',apy:'8-25%',risk:'MED',lock:'none',c:'#00F0A8'},
+    {icon:'🏛',name:'Covered Call Vault',apy:'8-52%',risk:'MED',lock:'weekly',c:'#7C4FFF'},
+    {icon:'🌀',name:'Leveraged Yield',apy:'5-15%',risk:'MED-HIGH',lock:'none',c:'#FF5C35'},
+    {icon:'🏦',name:'Lending Supply',apy:'4-8%',risk:'LOWEST',lock:'instant',c:'#0075FF'},
+  ];
+  document.getElementById('content').innerHTML = `
+    <div class="anim">
+      <div class="discover-hero" style="background:linear-gradient(135deg,rgba(0,240,168,.08),var(--bg2))">
+        <div class="dh-title" style="color:var(--G)">💰 Earn Hub</div>
+        <div class="dh-sub">7 ways to earn yield on Wikicious. All on-chain. All audited. Pick by risk, lock-up, and APY.</div>
+        <div class="dh-stats">
+          <div class="dh-stat"><div class="dh-stat-v" style="color:var(--G)">25%</div><div class="dh-stat-l">MAX APY</div></div>
+          <div class="dh-stat"><div class="dh-stat-v" style="color:var(--G)">4-8%</div><div class="dh-stat-l">INSTANT EXIT</div></div>
+          <div class="dh-stat"><div class="dh-stat-v" style="color:var(--G)">7</div><div class="dh-stat-l">STRATEGIES</div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${ways.map(w=>`
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border-radius:13px;border:1px solid ${w.c}18;cursor:pointer;transition:all .2s"
+            onclick="openDetail('${w.name.toLowerCase().replace(/[^a-z]/g,'').slice(0,8)}')"
+            onmouseover="this.style.borderColor='${w.c}50'" onmouseout="this.style.borderColor='${w.c}18'">
+            <div style="width:42px;height:42px;border-radius:11px;background:${w.c}18;border:1px solid ${w.c}30;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">${w.icon}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700">${w.name}</div>
+              <div style="display:flex;gap:8px;margin-top:4px">
+                <span class="tpill" style="background:${w.c}18;border:1px solid ${w.c}30;color:${w.c}">${w.risk} RISK</span>
+                <span class="tpill" style="background:var(--b);border:1px solid var(--b2);color:var(--t2)">Exit: ${w.lock}</span>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${w.c}">${w.apy}</div>
+              <div style="font-size:9px;color:var(--t2);margin-top:2px">APY</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ── BOTS PAGE ─────────────────────────────────────────────────────────────────
+function renderBots() {
+  const bots = [
+    {icon:'🤖',name:'Grid Bot',win:'67% win rate',best:'Sideways markets',min:'$10',c:'#00F0A8',id:'gridb'},
+    {icon:'⚡',name:'Funding Arb',win:'80-90% capture',best:'Any market',min:'$10',c:'#FFB020',id:'fundingb'},
+    {icon:'📊',name:'Trend Bot',win:'47% WR · 3:1 RR',best:'Trending markets',min:'$10',c:'#0075FF',id:'trendb'},
+    {icon:'↩️',name:'Mean Reversion',win:'63% win rate',best:'Ranging markets',min:'$10',c:'#7C4FFF',id:'meanb'},
+  ];
+  document.getElementById('content').innerHTML = `
+    <div class="anim">
+      <div class="discover-hero" style="background:linear-gradient(135deg,rgba(0,117,255,.08),var(--bg2))">
+        <div class="dh-title" style="color:var(--B)">🤖 Trading Bots</div>
+        <div class="dh-sub">4 automated strategies. 20% performance fee on profits only — you only pay when they make money.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+        ${bots.map(b=>`
+          <div style="padding:16px;background:var(--card);border-radius:14px;border:1px solid ${b.c}20;cursor:pointer;transition:all .2s"
+            onclick="openDetail('${b.id}')"
+            onmouseover="this.style.borderColor='${b.c}60'" onmouseout="this.style.borderColor='${b.c}20'">
+            <div style="font-size:24px;margin-bottom:8px">${b.icon}</div>
+            <div style="font-size:13px;font-weight:800;margin-bottom:4px">${b.name}</div>
+            <div style="font-size:11px;color:${b.c};font-weight:600;margin-bottom:6px">${b.win}</div>
+            <div style="font-size:10px;color:var(--t2)">Best for: ${b.best}</div>
+            <div style="font-size:10px;color:var(--t2);margin-top:2px">Min deposit: ${b.min} USDC</div>
+            <button style="width:100%;margin-top:12px;padding:9px;border-radius:9px;background:${b.c};color:${b.c==='#FFB020'||b.c==='#00F0A8'?'#000':'#fff'};font-weight:800;font-size:11px;border:none;cursor:pointer"
+              onclick="event.stopPropagation();alert('Deposit to start ${b.name}')">
+              Start ${b.name} →
+            </button>
+          </div>`).join('')}
+      </div>
+      <div style="padding:14px;background:var(--card);border-radius:13px;border:1px solid var(--b2)">
+        <div style="font-size:11px;font-weight:700;margin-bottom:8px">Also try: Copy Trading</div>
+        <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Follow a top trader and auto-mirror every position they open. 0 effort, 80% of their profits.</div>
+        <button style="padding:9px 16px;border-radius:9px;background:rgba(255,92,53,.2);border:1px solid rgba(255,92,53,.4);color:#FF5C35;font-weight:700;font-size:11px;cursor:pointer"
+          onclick="openDetail('copy')">Browse Traders →</button>
+      </div>
+    </div>`;
+}
+
+// ── PROP PAGE ─────────────────────────────────────────────────────────────────
+function renderProp() {
+  document.getElementById('content').innerHTML = `
+    <div class="anim">
+      <div class="discover-hero" style="background:linear-gradient(135deg,rgba(255,176,32,.08),var(--bg2))">
+        <div class="dh-title" style="color:var(--A)">🏆 Prop Trading</div>
+        <div class="dh-sub">Pass a 2-phase evaluation. Trade up to $200,000 of our capital. Keep 80-90% of all profits.</div>
+        <div class="dh-stats">
+          <div class="dh-stat"><div class="dh-stat-v" style="color:var(--A)">$200K</div><div class="dh-stat-l">MAX FUNDED</div></div>
+          <div class="dh-stat"><div class="dh-stat-v" style="color:var(--A)">90%</div><div class="dh-stat-l">YOUR SPLIT</div></div>
+          <div class="dh-stat"><div class="dh-stat-v" style="color:var(--A)">$50</div><div class="dh-stat-l">FROM</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+        ${[['Phase 1','8% target\n30 days\n100× max lev','→','#0075FF'],['→ RESET','Balance resets\nClean slate\nProve again','→','#FFB020'],['Phase 2','5% target\n60 days\n50× max lev (stricter)','✅','#00F0A8']].map(([t,d,a,c])=>`
+          <div style="padding:12px;background:var(--card);border-radius:11px;border:1px solid ${c}25;text-align:center">
+            <div style="font-size:12px;font-weight:800;color:${c};margin-bottom:6px">${t}</div>
+            <div style="font-size:9px;color:var(--t2);line-height:1.6;white-space:pre-line">${d}</div>
+          </div>`).join('')}
+      </div>
+      ${[['💵 STARTER — $50 fee','$5,000 funded · 80% split'],['💰 ADVANCED — $250 fee','$50,000 funded · 85% split'],['⭐ ELITE — $500 fee','$100,000 funded · 90% split'],['👑 MASTER — $1,000 fee','$200,000 funded · 90% split']].map(([t,d])=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--card);border-radius:12px;border:1px solid var(--b2);margin-bottom:8px;cursor:pointer"
+          onclick="openDetail('prop')"
+          onmouseover="this.style.borderColor='var(--A)'" onmouseout="this.style.borderColor='var(--b2)'">
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:700">${t.slice(3)}</div>
+            <div style="font-size:10px;color:var(--t2);margin-top:3px">${d}</div>
+          </div>
+          <button style="padding:8px 16px;border-radius:9px;background:var(--A);color:#000;font-weight:800;font-size:11px;border:none;cursor:pointer"
+            onclick="event.stopPropagation();alert('Buy challenge and start evaluation')">Buy →</button>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── PORTFOLIO PAGE ────────────────────────────────────────────────────────────
+function renderPortfolio() {
+  document.getElementById('content').innerHTML = `
+    <div class="anim">
+      <div style="background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--b2);border-radius:14px;padding:20px;margin-bottom:16px">
+        <div style="font-size:11px;color:var(--t2);margin-bottom:4px;font-family:'JetBrains Mono',monospace">TOTAL NET WORTH</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--G)">$48,294</div>
+        <div style="font-size:12px;color:var(--G);margin-top:4px">+$1,284 today (+2.73%)</div>
+      </div>
+      ${[['🔓 Trading Margin','$8,000','#00F0A8'],['🔒 veWIK Staked','$12,400','#0075FF'],['⚖️ Delta-Neutral LP','$8,200','#00C8FF'],['🤖 Grid Bot','$5,284','#00F0A8'],['🏆 Prop Funded','$10,200','#FFB020'],['💵 USDC Balance','$4,210','#00F0A8']].map(([k,v,c])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--card);border-radius:11px;border:1px solid var(--b2);margin-bottom:8px">
+          <span style="font-size:12px;font-weight:600">${k}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${c}">${v}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── MARKETS PAGE ──────────────────────────────────────────────────────────────
+function renderMarkets() {
+  const mks = [
+    ['BTC/USD','$67,284','+2.14%','#00F0A8'],['ETH/USD','$3,241','+1.87%','#00F0A8'],
+    ['SOL/USD','$148.20','+3.42%','#00F0A8'],['EUR/USD','1.0842','+0.12%','#00F0A8'],
+    ['GBP/USD','1.2641','+0.08%','#00F0A8'],['XAU/USD','$2,384','+0.84%','#00F0A8'],
+    ['BNB/USD','$412.30','-0.54%','#FF2D55'],['ARB/USD','$1.24','-1.20%','#FF2D55'],
+    ['DOGE/USD','$0.142','+5.21%','#00F0A8'],['USD/JPY','151.42','-0.14%','#FF2D55'],
+  ];
+  document.getElementById('content').innerHTML = `
+    <div class="anim">
+      <div class="section-header"><div class="section-title">🌐 All Markets (295)</div></div>
+      <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap">
+        ${['All','Crypto','Forex','Metals','Indices','Commodities'].map((t,i)=>`
+          <button style="padding:6px 14px;border-radius:8px;background:${i===0?'var(--B)':'var(--card)'};border:1px solid ${i===0?'var(--B)':'var(--b2)'};color:${i===0?'#fff':'var(--t2)'};font-size:11px;font-weight:700;cursor:pointer">${t}</button>`).join('')}
+      </div>
+      ${mks.map(([n,p,ch,c])=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--card);border-radius:11px;border:1px solid var(--b2);margin-bottom:7px;cursor:pointer"
+          onclick="switchPage('perp')"
+          onmouseover="this.style.borderColor='var(--B)'" onmouseout="this.style.borderColor='var(--b2)'">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px">📈</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">${n}</div><div style="font-size:9px;color:var(--t2)">Perpetual</div></div>
+          <div style="text-align:right">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">${p}</div>
+            <div style="font-size:10px;color:${c};font-weight:700">${ch}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── WALLET PAGE ───────────────────────────────────────────────────────────────
+function renderWallet() {
+  document.getElementById('content').innerHTML = `
+    <div class="anim">
+      <div style="background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--b2);border-radius:14px;padding:20px;margin-bottom:16px">
+        <div style="font-size:11px;color:var(--t2);margin-bottom:4px">TRADING BALANCE</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700">$5,240.00</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:12px">
+          ${[['⬇ Deposit','#00F0A8'],['⬆ Withdraw','#FF2D55'],['↑ Send','#0075FF'],['↓ Receive','#0075FF'],['💳 Buy USDC','#FFB020'],['🌉 Bridge','#7C4FFF']].map(([l,c])=>`
+            <button style="padding:7px 14px;border-radius:9px;background:${c}15;border:1px solid ${c}30;color:${c};font-size:11px;font-weight:700;cursor:pointer"
+              onclick="alert('${l} — connect wallet to continue')">${l}</button>`).join('')}
+        </div>
+      </div>
+      <div class="section-header"><div class="section-title">Also available</div></div>
+      ${[['📂 Sub-Accounts','10 isolated strategies','sub'],['💰 Multi-Collateral','BTC/ETH/ARB as margin','multicol'],['⚡ API Access','Programmatic trading','api'],['📱 Telegram Bot','Trade from /chat','telegram'],['⛽ Gasless Trading','Zero ETH needed','gasless']].map(([t,d,p])=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border-radius:11px;border:1px solid var(--b2);margin-bottom:8px;cursor:pointer"
+          onclick="openDetail('${p}')"
+          onmouseover="this.style.borderColor='var(--B)'" onmouseout="this.style.borderColor='var(--b2)'">
+          <span style="font-size:20px">${t.slice(0,2)}</span>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">${t.slice(2)}</div><div style="font-size:10px;color:var(--t2)">${d}</div></div>
+          <span style="color:var(--B);font-size:14px">›</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+function doSearch(q) {
+  if (!q.trim()) { hideSearch(); return; }
+  const results = FEATURES.filter(f =>
+    f.name.toLowerCase().includes(q.toLowerCase()) ||
+    f.desc.toLowerCase().includes(q.toLowerCase()) ||
+    f.cat.toLowerCase().includes(q.toLowerCase()) ||
+    f.tag.toLowerCase().includes(q.toLowerCase())
+  ).slice(0, 7);
+
+  const el = document.getElementById('search-results');
+  if (!results.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = results.map(f => `
+    <div class="sr-item" onclick="document.getElementById('search').value='';hideSearch();openDetail('${f.id}')">
+      <span class="sr-icon">${f.icon}</span>
+      <div style="flex:1">
+        <div class="sr-name">${f.name}</div>
+        <div class="sr-cat">${f.cat} · ${f.desc.slice(0,45)}...</div>
+      </div>
+      <span class="sr-tag tpill" style="background:${f.c}18;color:${f.c};border:1px solid ${f.c}30">${f.tag}</span>
+    </div>`).join('');
+}
+function showSearch() { if (document.getElementById('search').value) doSearch(document.getElementById('search').value); }
+function hideSearch()  { document.getElementById('search-results').style.display = 'none'; }
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+switchPage('discover');
+
+// Responsive: auto-collapse sidebar on small screens
+if (window.innerWidth < 1100) toggleSidebar();
+window.addEventListener('resize', () => {
+  if (window.innerWidth < 768) document.getElementById('sidebar').style.display = 'none';
+  else document.getElementById('sidebar').style.display = 'flex';
+});
+</script>
+</body>
+</html>

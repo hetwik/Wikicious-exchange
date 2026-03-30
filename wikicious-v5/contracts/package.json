@@ -1,0 +1,23 @@
+{
+  "name": "wikicious-v5",
+  "version": "5.0.0",
+  "description": "Wikicious Exchange — Solidity smart contracts",
+  "scripts": {
+    "compile":        "hardhat compile",
+    "test":           "hardhat test",
+    "deploy":         "hardhat run scripts/deploy.js --network arbitrum",
+    "deploy:testnet": "hardhat run scripts/deploy.js --network arbitrum_sepolia",
+    "verify":         "hardhat run scripts/verify.js --network arbitrum",
+    "transfer":       "hardhat run scripts/transfer-ownership.js --network arbitrum",
+    "accept":         "hardhat run scripts/accept-ownership.js --network arbitrum"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat":                          "^2.22.15",
+    "dotenv":                           "^16.4.5"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
+    "@chainlink/contracts":    "^1.3.0"
+  }
+}

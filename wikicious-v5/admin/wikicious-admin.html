@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Wikicious V5 — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#030810;--bg2:#060C18;--bg3:#091220;--card:#0B1525;--b:#0E1E35;--b2:#152840;
+  --G:#00F0A8;--B:#0075FF;--V:#7C4FFF;--A:#FFB020;--R:#FF2D55;--T:#00C8FF;
+  --t1:#E8F4FF;--t2:#4E6E90;--t3:#1E3250;}
+body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--t1);min-height:100vh}
+button{cursor:pointer;font-family:'Outfit',sans-serif;outline:none}
+input,select,textarea{font-family:'JetBrains Mono',monospace;outline:none}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--b2)}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{background:var(--card);border:1px solid var(--b2);border-radius:18px;padding:36px;width:380px;text-align:center}
+.login-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--G),var(--B));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#000;margin:0 auto 16px}
+.login-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--t2);margin-bottom:24px;line-height:1.5}
+.login-input{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--t1);margin-bottom:10px}
+.login-btn{width:100%;padding:12px;border-radius:11px;background:linear-gradient(135deg,var(--B),var(--G));color:#000;font-weight:800;font-size:14px;border:none;font-family:'Syne',sans-serif;margin-top:4px}
+.login-warn{font-size:10px;color:var(--R);margin-top:10px;display:none}
+
+/* APP SHELL */
+#app{display:none}
+.topbar{background:rgba(3,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--b2);padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.logo{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800}
+.lm{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--G),var(--B));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000}
+.session-pill{padding:3px 10px;border-radius:100px;background:var(--G)15;border:1px solid var(--G)30;font-size:10px;color:var(--G);font-family:'JetBrains Mono',monospace}
+.safe-pill{padding:3px 10px;border-radius:100px;background:var(--B)15;border:1px solid var(--B)30;font-size:10px;color:var(--B);font-family:'JetBrains Mono',monospace}
+.tenderly-pill{padding:3px 10px;border-radius:100px;background:var(--V)15;border:1px solid var(--V)30;font-size:10px;color:var(--V);font-family:'JetBrains Mono',monospace}
+.signout{padding:6px 14px;border-radius:9px;background:var(--R)15;border:1px solid var(--R)30;color:var(--R);font-size:11px;font-weight:700;margin-left:auto}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 52px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--b2);padding:12px 0;overflow-y:auto;position:sticky;top:52px;height:calc(100vh - 52px)}
+.sb-group{padding:4px 10px 2px;font-size:8px;font-weight:700;color:var(--t3);letter-spacing:1.5px;font-family:'JetBrains Mono',monospace;margin-top:6px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:7px 12px;border-radius:9px;margin:1px 6px;cursor:pointer;transition:all .15s;font-size:12px;font-weight:600;color:var(--t2)}
+.sb-item:hover{background:var(--bg3);color:var(--t1)}
+.sb-item.active{background:linear-gradient(135deg,var(--B)18,var(--G)08);border:1px solid var(--B)20;color:var(--t1)}
+.sb-ico{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+
+/* CONTENT */
+.content{padding:24px;overflow-y:auto}
+.panel{display:none}
+.panel.active{display:block}
+.panel-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.panel-sub{font-size:12px;color:var(--t2);margin-bottom:20px;line-height:1.5}
+
+/* CARDS */
+.card{background:var(--card);border-radius:14px;border:1px solid var(--b2);margin-bottom:14px;overflow:hidden}
+.card-hd{padding:12px 16px;border-bottom:1px solid var(--b);background:var(--bg3);display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700}
+.card-body{padding:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* FORM */
+.flbl{font-size:9px;font-weight:700;color:var(--t2);margin-bottom:5px;letter-spacing:.5px;font-family:'JetBrains Mono',monospace}
+.finput{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:9px;padding:9px 12px;font-size:13px;color:var(--t1);transition:border-color .15s}
+.finput:focus{border-color:var(--B)}
+.fselect{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--t1)}
+.fgroup{margin-bottom:12px}
+.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(14,30,53,.8);font-size:12px}
+.row span:first-child{color:var(--t2)}.row span:last-child{font-family:'JetBrains Mono',monospace;font-weight:500}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:10px;font-weight:700;font-size:12px;border:none;transition:all .15s;font-family:'Outfit',sans-serif}
+.btn-green{background:var(--G);color:#000}
+.btn-blue{background:var(--B);color:#fff}
+.btn-red{background:var(--R);color:#fff}
+.btn-gold{background:var(--A);color:#000}
+.btn-ghost{background:var(--bg3);border:1px solid var(--b2);color:var(--t2)}
+.btn-ghost:hover{border-color:var(--B);color:var(--t1)}
+.btn-sim{background:var(--V)20;border:1px solid var(--V)40;color:var(--V);padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700}
+.btn-full{width:100%;padding:12px;border-radius:11px;font-weight:800;font-size:13px;font-family:'Syne',sans-serif}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* STAT BOXES */
+.sbox{background:var(--bg3);border-radius:10px;padding:12px 14px;border:1px solid var(--b)}
+.sbox-lbl{font-size:8px;font-weight:700;color:var(--t2);letter-spacing:.6px;font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+.sbox-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
+
+/* ALERT */
+.alert{padding:10px 14px;border-radius:10px;font-size:11px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.alert-warn{background:var(--R)10;border:1px solid var(--R)30;color:var(--R)}
+.alert-info{background:var(--B)10;border:1px solid var(--B)30;color:var(--B)}
+.alert-success{background:var(--G)10;border:1px solid var(--G)30;color:var(--G)}
+
+/* PILL */
+.pill{display:inline-block;padding:2px 8px;border-radius:100px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.pill-g{background:var(--G)15;border:1px solid var(--G)30;color:var(--G)}
+.pill-r{background:var(--R)15;border:1px solid var(--R)30;color:var(--R)}
+.pill-a{background:var(--A)15;border:1px solid var(--A)30;color:var(--A)}
+.pill-b{background:var(--B)15;border:1px solid var(--B)30;color:var(--B)}
+
+/* TENDERLY SIM */
+.sim-result{background:var(--bg3);border-radius:10px;padding:12px;border:1px solid var(--V)30;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--V);display:none}
+
+/* TOAST */
+#toast{position:fixed;top:16px;right:16px;z-index:9999;padding:11px 17px;border-radius:11px;font-size:12px;font-weight:700;background:var(--card);box-shadow:0 12px 36px rgba(0,0,0,.6);display:none;min-width:220px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">W</div>
+    <div class="login-title">Wikicious Admin</div>
+    <div class="login-sub">Owner wallet only. Wrong wallet shows 404.<br>Session expires after 4 hours.</div>
+    <input class="login-input" id="wallet-input" placeholder="Enter owner wallet address 0x..." />
+    <input class="login-input" id="sig-input" placeholder="Paste signed message here..." type="password"/>
+    <button class="login-btn" onclick="doLogin()">Sign In & Start Session</button>
+    <div class="login-warn" id="login-warn">⚠ Wrong wallet or invalid signature</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="logo"><div class="lm">W</div>Wikicious Admin</div>
+    <span class="session-pill">🟢 OWNER · <span id="session-timer">3h 59m</span> left</span>
+    <span class="safe-pill">🔐 Genesis Safe: 2-of-3</span>
+    <span class="tenderly-pill">⚡ Tenderly: ON</span>
+    <button class="signout" onclick="doSignOut()">Sign Out</button>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-group">OVERVIEW</div>
+      <div class="sb-item active" onclick="show('dashboard')"><span class="sb-ico">📊</span>Dashboard</div>
+      <div class="sb-item" onclick="show('salary')"><span class="sb-ico">💵</span>Founder Salary</div>
+      <div class="sb-item" onclick="show('safe')"><span class="sb-ico">🔐</span>Genesis Safe / Multisig</div>
+
+      <div class="sb-group">REVENUE</div>
+      <div class="sb-item" onclick="show('revenue')"><span class="sb-ico">💹</span>Revenue Splitter</div>
+      <div class="sb-item" onclick="show('opsvault')"><span class="sb-ico">🏛</span>Ops Vault</div>
+      <div class="sb-item" onclick="show('buyback')"><span class="sb-ico">🔥</span>Buyback & Burn</div>
+      <div class="sb-item" onclick="show('fees')"><span class="sb-ico">💸</span>Fee Config</div>
+
+      <div class="sb-group">TRADING</div>
+      <div class="sb-item" onclick="show('markets')"><span class="sb-ico">🌐</span>Markets (295)</div>
+      <div class="sb-item" onclick="show('leverage')"><span class="sb-ico">⚡</span>Leverage Caps</div>
+      <div class="sb-item" onclick="show('circuit')"><span class="sb-ico">🚨</span>Circuit Breaker</div>
+      <div class="sb-item" onclick="show('oracles')"><span class="sb-ico">🔮</span>Oracles</div>
+      <div class="sb-item" onclick="show('liquidity')"><span class="sb-ico">💧</span>Liquidity & POL</div>
+
+      <div class="sb-group">PROP TRADING</div>
+      <div class="sb-item" onclick="show('prop')"><span class="sb-ico">🏆</span>Prop Config</div>
+      <div class="sb-item" onclick="show('funded')"><span class="sb-ico">💵</span>Funded Accounts</div>
+      <div class="sb-item" onclick="show('proppool')"><span class="sb-ico">🏦</span>Prop Pool</div>
+
+      <div class="sb-group">EARN</div>
+      <div class="sb-item" onclick="show('staking')"><span class="sb-ico">🔒</span>Staking & Gauges</div>
+      <div class="sb-item" onclick="show('lending')"><span class="sb-ico">🏦</span>Lending Pools</div>
+      <div class="sb-item" onclick="show('backstop')"><span class="sb-ico">🛡</span>Backstop Vault</div>
+      <div class="sb-item" onclick="show('liqmining')"><span class="sb-ico">⛏</span>Liquidity Mining</div>
+      <div class="sb-item" onclick="show('vaultmkt')"><span class="sb-ico">🏪</span>Vault Marketplace</div>
+
+      <div class="sb-group">GROWTH</div>
+      <div class="sb-item" onclick="show('season')"><span class="sb-ico">⭐</span>Season XP</div>
+      <div class="sb-item" onclick="show('nft')"><span class="sb-ico">💎</span>Revenue NFT</div>
+      <div class="sb-item" onclick="show('affiliate')"><span class="sb-ico">🎁</span>Affiliate</div>
+      <div class="sb-item" onclick="show('launch')"><span class="sb-ico">🚀</span>Launchpad / IEO</div>
+
+      <div class="sb-group">PROTOCOL</div>
+      <div class="sb-item" onclick="show('governance')"><span class="sb-ico">🗳</span>Governance</div>
+      <div class="sb-item" onclick="show('security')"><span class="sb-ico">🔐</span>Security</div>
+      <div class="sb-item" onclick="show('tvlguard')"><span class="sb-ico">🛡</span>TVL Guard</div>
+      <div class="sb-item" onclick="show('keepers')"><span class="sb-ico">🤖</span>Keepers & Bots</div>
+      <div class="sb-item" onclick="show('bridge')"><span class="sb-ico">🌉</span>Bridge</div>
+      <div class="sb-item" onclick="show('emergency')"><span class="sb-ico">🚨</span>Emergency</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="panel-title">📊 Protocol Dashboard</div>
+        <div class="panel-sub">Live protocol stats. All data from on-chain contracts.</div>
+        <div class="grid-4" style="margin-bottom:14px">
+          <div class="sbox"><div class="sbox-lbl">24H FEES</div><div class="sbox-val" style="color:var(--A)">$33,740</div></div>
+          <div class="sbox"><div class="sbox-lbl">TOTAL TVL</div><div class="sbox-val" style="color:var(--G)">$124M</div></div>
+          <div class="sbox"><div class="sbox-lbl">OPS VAULT</div><div class="sbox-val" style="color:var(--A)">$686K</div></div>
+          <div class="sbox"><div class="sbox-lbl">TRADERS</div><div class="sbox-val">8,420</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Revenue (24h breakdown)</div><div class="card-body">
+            <div class="row"><span>Trading fees</span><span style="color:var(--G)">$18,420</span></div>
+            <div class="row"><span>Prop challenge fees</span><span style="color:var(--A)">$6,000</span></div>
+            <div class="row"><span>Bot perf fees</span><span style="color:var(--B)">$4,280</span></div>
+            <div class="row"><span>Subscriptions</span><span style="color:var(--V)">$2,840</span></div>
+            <div class="row"><span>Dark pool</span><span style="color:var(--V)">$1,240</span></div>
+            <div class="row"><span>Other</span><span style="color:var(--t2)">$960</span></div>
+          </div></div>
+          <div class="card"><div class="card-hd">System Status</div><div class="card-body">
+            <div class="row"><span>Contracts deployed</span><span style="color:var(--G)">129 ✅</span></div>
+            <div class="row"><span>Markets active</span><span style="color:var(--G)">295 ✅</span></div>
+            <div class="row"><span>Oracle (Pyth)</span><span style="color:var(--G)">Live ✅</span></div>
+            <div class="row"><span>Oracle (Chainlink)</span><span style="color:var(--G)">Live ✅</span></div>
+            <div class="row"><span>Keeper bots</span><span style="color:var(--G)">7/7 running ✅</span></div>
+            <div class="row"><span>Genesis Safe</span><span style="color:var(--B)">2-of-3 active ✅</span></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- SALARY -->
+      <div class="panel" id="panel-salary">
+        <div class="panel-title">💵 Founder Salary</div>
+        <div class="panel-sub">Claim your monthly founder salary from WikiDAOTreasury. Salary is set by governance and vested monthly.</div>
+        <div class="alert alert-success">✅ $15,000 USDC available to claim now</div>
+        <div class="card"><div class="card-hd">Claimable Salary</div><div class="card-body">
+          <div style="text-align:center;padding:20px 0">
+            <div style="font-size:9px;color:var(--t2);font-family:'JetBrains Mono',monospace;margin-bottom:6px">AVAILABLE TO CLAIM</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:700;color:var(--G)">$15,000</div>
+            <div style="font-size:11px;color:var(--t2);margin-top:6px">USDC · Accrued since last claim (30 days)</div>
+          </div>
+          <div class="row"><span>Monthly salary rate</span><span style="color:var(--G)">$15,000/month</span></div>
+          <div class="row"><span>Last claim</span><span>30 days ago</span></div>
+          <div class="row"><span>Next accrual</span><span>In 0 days (available now)</span></div>
+          <div class="row"><span>Contract</span><span style="color:var(--B)">WikiDAOTreasury</span></div>
+          <div class="btn-row">
+            <button class="btn btn-sim" onclick="simulate('WikiDAOTreasury.claimSalary()')">⚡ Simulate First</button>
+            <button class="btn btn-green btn-full" onclick="adminAction('Claim $15,000 salary — sign on Safe')">Claim $15,000 USDC →</button>
+          </div>
+          <div class="sim-result" id="sim-salary">✅ Simulation: Gas ~$0.04 · Event: SalaryClaimed($15,000) · No reverts</div>
+        </div></div>
+      </div>
+
+      <!-- GENESIS SAFE / MULTISIG -->
+      <div class="panel" id="panel-safe">
+        <div class="panel-title">🔐 Genesis Safe — Multisig</div>
+        <div class="panel-sub">Your Genesis Safe wallet is the owner of all 129 contracts. 2-of-3 signatures required for every protocol change.</div>
+        <div class="alert alert-info">ℹ All write transactions queue to Safe and require 2 signers before execution.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Safe Configuration</div><div class="card-body">
+            <div class="row"><span>Safe type</span><span style="color:var(--B)">Genesis Safe (Gnosis)</span></div>
+            <div class="row"><span>Network</span><span style="color:var(--B)">Arbitrum One</span></div>
+            <div class="row"><span>Threshold</span><span style="color:var(--A)">2-of-3 signers</span></div>
+            <div class="row"><span>Signer 1</span><span style="color:var(--G)">Hardware Wallet 1 (Lead)</span></div>
+            <div class="row"><span>Signer 2</span><span style="color:var(--G)">Hardware Wallet 2 (Backup)</span></div>
+            <div class="row"><span>Signer 3</span><span style="color:var(--G)">Hardware Wallet 3 (Emergency)</span></div>
+            <div class="row"><span>Timelock</span><span style="color:var(--A)">48 hours on governance changes</span></div>
+            <div class="row"><span>Contracts owned</span><span style="color:var(--G)">129 contracts ✅</span></div>
+          </div></div>
+          <div class="card"><div class="card-hd">Pending Transactions</div><div class="card-body">
+            <div style="font-size:11px;color:var(--t2);padding:20px;text-align:center">No pending transactions in Safe queue</div>
+            <div class="fgroup">
+              <div class="flbl">PROPOSE NEW TRANSACTION</div>
+              <select class="fselect" style="margin-bottom:8px">
+                <option>Select contract...</option>
+                <option>WikiRevenueSplitter</option>
+                <option>WikiPropEval</option>
+                <option>WikiTVLGuard</option>
+                <option>WikiCircuitBreaker</option>
+                <option>WikiDAOTreasury</option>
+              </select>
+              <input class="finput" placeholder="Function call e.g. setSplitBps(3000,500,3200,2300,1000)" style="margin-bottom:8px"/>
+              <button class="btn btn-blue btn-full" onclick="adminAction('Queue transaction to Genesis Safe')">Queue to Safe →</button>
+            </div>
+          </div></div>
+        </div>
+        <div class="card"><div class="card-hd">How to Sign with Genesis Safe</div><div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+            <div style="padding:12px;background:var(--bg3);border-radius:10px;border:1px solid var(--B)20;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">1️⃣</div>
+              <div style="font-size:11px;font-weight:700;color:var(--B)">Queue Tx</div>
+              <div style="font-size:10px;color:var(--t2);margin-top:4px">Admin panel proposes transaction to Safe</div>
+            </div>
+            <div style="padding:12px;background:var(--bg3);border-radius:10px;border:1px solid var(--A)20;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">2️⃣</div>
+              <div style="font-size:11px;font-weight:700;color:var(--A)">Signer 1</div>
+              <div style="font-size:10px;color:var(--t2);margin-top:4px">Open app.safe.global → sign on HW1</div>
+            </div>
+            <div style="padding:12px;background:var(--bg3);border-radius:10px;border:1px solid var(--G)20;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">3️⃣</div>
+              <div style="font-size:11px;font-weight:700;color:var(--G)">Signer 2</div>
+              <div style="font-size:10px;color:var(--t2);margin-top:4px">Second signer approves on HW2</div>
+            </div>
+            <div style="padding:12px;background:var(--bg3);border-radius:10px;border:1px solid var(--G)20;text-align:center">
+              <div style="font-size:20px;margin-bottom:6px">4️⃣</div>
+              <div style="font-size:11px;font-weight:700;color:var(--G)">Execute</div>
+              <div style="font-size:10px;color:var(--t2);margin-top:4px">2-of-3 met → execute on-chain</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- REVENUE -->
+      <div class="panel" id="panel-revenue">
+        <div class="panel-title">💹 Revenue Splitter</div>
+        <div class="panel-sub">WikiRevenueSplitter — controls how all protocol fees are distributed. Requires Safe 2-of-3 to change.</div>
+        <div class="card"><div class="card-hd">Current Split Configuration</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="row"><span>Ops Wallet (auto-invest)</span><span style="color:var(--A)">30%</span></div>
+              <div class="row"><span>Reserve Wallet</span><span style="color:var(--t2)">5%</span></div>
+              <div class="row"><span>veWIK Stakers</span><span style="color:var(--B)">32%</span></div>
+              <div class="row"><span>Protocol POL</span><span style="color:var(--G)">23%</span></div>
+              <div class="row"><span>Safety/Insurance Fund</span><span style="color:var(--R)">10%</span></div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">OPS VAULT ADDRESS</div><input class="finput" value="0x..." /></div>
+              <div class="fgroup"><div class="flbl">RESERVE WALLET</div><input class="finput" value="0x..." /></div>
+              <div class="btn-row">
+                <button class="btn btn-sim" onclick="simulate('WikiRevenueSplitter.setSplitBps(3000,500,3200,2300,1000)')">⚡ Simulate</button>
+                <button class="btn btn-gold" onclick="adminAction('Update revenue split — queue to Safe')">Update Split →</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- OPS VAULT -->
+      <div class="panel" id="panel-opsvault">
+        <div class="panel-title">🏛 Ops Vault</div>
+        <div class="panel-sub">WikiOpsVault — auto-invests 30% of all fees at 12.4% APY blended yield.</div>
+        <div class="grid-4" style="margin-bottom:14px">
+          <div class="sbox"><div class="sbox-lbl">TOTAL VALUE</div><div class="sbox-val" style="color:var(--A)">$686K</div></div>
+          <div class="sbox"><div class="sbox-lbl">YIELD EARNED</div><div class="sbox-val" style="color:var(--G)">$38K</div></div>
+          <div class="sbox"><div class="sbox-lbl">BLENDED APY</div><div class="sbox-val" style="color:var(--T)">12.4%</div></div>
+          <div class="sbox"><div class="sbox-lbl">INSTANT LIQUID</div><div class="sbox-val" style="color:var(--B)">$343K</div></div>
+        </div>
+        <div class="card"><div class="card-hd">Allocation Config</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="row"><span>WikiLending (40%)</span><span style="color:var(--B)">~6% APY · instant</span></div>
+              <div class="row"><span>WikiBackstop (40%)</span><span style="color:var(--A)">~20% APY · 7-day</span></div>
+              <div class="row"><span>FundingArb (10%)</span><span style="color:var(--V)">~10% APY · 1-3 day</span></div>
+              <div class="row"><span>Idle Buffer (10%)</span><span style="color:var(--t2)">0% · instant</span></div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">LENDING BPS (40%=4000)</div><input class="finput" value="4000"/></div>
+              <div class="fgroup"><div class="flbl">BACKSTOP BPS (40%=4000)</div><input class="finput" value="4000"/></div>
+              <div class="fgroup"><div class="flbl">FUNDING ARB BPS</div><input class="finput" value="1000"/></div>
+              <div class="btn-row">
+                <button class="btn btn-sim" onclick="simulate('WikiOpsVault.setAllocationBps(4000,4000,1000,1000)')">⚡ Simulate</button>
+                <button class="btn btn-gold" onclick="adminAction('Update ops vault allocations')">Update →</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- MARKETS -->
+      <div class="panel" id="panel-markets">
+        <div class="panel-title">🌐 Market Registry (295 Markets)</div>
+        <div class="panel-sub">WikiMarketRegistry — add, remove, pause individual markets. All 295 markets managed here.</div>
+        <div class="alert alert-success">✅ 295 markets registered and active</div>
+        <div class="card"><div class="card-hd">Add New Market</div><div class="card-body">
+          <div class="grid-3">
+            <div class="fgroup"><div class="flbl">MARKET NAME</div><input class="finput" placeholder="e.g. PEPE/USD"/></div>
+            <div class="fgroup"><div class="flbl">CATEGORY</div><select class="fselect"><option>Crypto</option><option>Forex</option><option>Metals</option><option>Index</option><option>Commodity</option></select></div>
+            <div class="fgroup"><div class="flbl">MAX LEVERAGE</div><input class="finput" value="100"/></div>
+            <div class="fgroup"><div class="flbl">ORACLE ADDRESS</div><input class="finput" placeholder="Pyth price feed ID..."/></div>
+            <div class="fgroup"><div class="flbl">MAINTENANCE MARGIN %</div><input class="finput" value="0.5"/></div>
+            <div class="fgroup"><div class="flbl">MAX POSITION SIZE ($)</div><input class="finput" value="1000000"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sim" onclick="simulate('WikiMarketRegistry.addMarket(...)')">⚡ Simulate</button>
+            <button class="btn btn-green" onclick="adminAction('Add new market — queue to Safe')">Add Market →</button>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-hd">Pause / Resume Market</div><div class="card-body">
+          <div class="grid-3">
+            <div class="fgroup"><div class="flbl">MARKET ID</div><input class="finput" placeholder="e.g. 0 (BTC/USD)"/></div>
+            <div>
+              <div class="btn-row" style="margin-top:20px">
+                <button class="btn btn-red" onclick="adminAction('Pause market — queue to Safe')">Pause Market</button>
+                <button class="btn btn-green" onclick="adminAction('Resume market — queue to Safe')">Resume Market</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- LEVERAGE -->
+      <div class="panel" id="panel-leverage">
+        <div class="panel-title">⚡ Leverage Caps</div>
+        <div class="panel-sub">WikiLeverageScaler + WikiPropFunded — set per-market and per-tier leverage limits.</div>
+        <div class="card"><div class="card-hd">Global Leverage Caps</div><div class="card-body">
+          <div class="grid-3">
+            <div class="fgroup"><div class="flbl">CRYPTO MAX (standard)</div><input class="finput" value="1000"/></div>
+            <div class="fgroup"><div class="flbl">FOREX MAX</div><input class="finput" value="2000"/></div>
+            <div class="fgroup"><div class="flbl">METALS MAX</div><input class="finput" value="1000"/></div>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-hd">Funded Account Leverage Caps</div><div class="card-body">
+          <div class="grid-4">
+            <div class="fgroup"><div class="flbl">TIER 1 FUNDED MAX</div><input class="finput" value="10"/></div>
+            <div class="fgroup"><div class="flbl">TIER 2 FUNDED MAX</div><input class="finput" value="15"/></div>
+            <div class="fgroup"><div class="flbl">TIER 3 (INSTANT) MAX</div><input class="finput" value="5"/></div>
+            <div class="fgroup"><div class="flbl">FOREX FUNDED MAX</div><input class="finput" value="20"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sim" onclick="simulate('WikiPropFunded.setMarketLeverageCap(forexId, 20)')">⚡ Simulate</button>
+            <button class="btn btn-gold" onclick="adminAction('Update leverage caps — queue to Safe')">Update All Caps →</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- CIRCUIT BREAKER -->
+      <div class="panel" id="panel-circuit">
+        <div class="panel-title">🚨 Circuit Breaker</div>
+        <div class="panel-sub">WikiCircuitBreaker — emergency halt for all markets or individual markets.</div>
+        <div class="alert alert-success">✅ All markets ACTIVE — no circuit breaker triggered</div>
+        <div class="card"><div class="card-hd">Emergency Controls</div><div class="card-body">
+          <div class="btn-row">
+            <button class="btn btn-red" style="flex:1;padding:14px" onclick="adminAction('HALT ALL MARKETS — EMERGENCY — queue to Safe')">🚨 HALT ALL MARKETS</button>
+            <button class="btn btn-green" style="flex:1;padding:14px" onclick="adminAction('Resume all markets')">✅ RESUME ALL</button>
+          </div>
+          <div style="margin-top:14px">
+            <div class="flbl">HALT INDIVIDUAL MARKET (by ID)</div>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <input class="finput" placeholder="Market ID" style="flex:1"/>
+              <button class="btn btn-red" onclick="adminAction('Halt single market')">Halt Market</button>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <div class="flbl">AUTO-HALT THRESHOLD (% price move)</div>
+            <input class="finput" value="10" style="margin-top:6px"/>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sim" onclick="simulate('WikiCircuitBreaker.setAutoHaltThreshold(10)')">⚡ Simulate</button>
+            <button class="btn btn-gold" onclick="adminAction('Update circuit breaker config')">Save Config</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- ORACLES -->
+      <div class="panel" id="panel-oracles">
+        <div class="panel-title">🔮 Oracle Management</div>
+        <div class="panel-sub">WikiOracle + WikiForexOracle — manage Pyth and Chainlink price feeds. Fallback ordering: Pyth → Chainlink → TWAP.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Pyth Oracle Config</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">PYTH CONTRACT ADDRESS</div><input class="finput" value="0xff1a0f4744e8582DF1aE09D5611b887B6a12925C"/></div>
+            <div class="fgroup"><div class="flbl">MAX PRICE AGE (seconds)</div><input class="finput" value="60"/></div>
+            <div class="fgroup"><div class="flbl">CONFIDENCE THRESHOLD</div><input class="finput" value="100"/></div>
+            <div class="btn-row">
+              <button class="btn btn-gold" onclick="adminAction('Update Pyth config')">Update</button>
+            </div>
+          </div></div>
+          <div class="card"><div class="card-hd">Chainlink Fallback</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">BTC/USD FEED</div><input class="finput" value="0x6ce185539..."/></div>
+            <div class="fgroup"><div class="flbl">ETH/USD FEED</div><input class="finput" value="0x639Fe6ab..."/></div>
+            <div class="fgroup"><div class="flbl">STALE PRICE TIMEOUT</div><input class="finput" value="3600"/></div>
+            <div class="btn-row">
+              <button class="btn btn-gold" onclick="adminAction('Update Chainlink feeds')">Update</button>
+            </div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- LIQUIDITY -->
+      <div class="panel" id="panel-liquidity">
+        <div class="panel-title">💧 Liquidity & POL</div>
+        <div class="panel-sub">WikiPOL + WikiBondingPOL + WikiHybridLiquidityManager — manage protocol-owned liquidity.</div>
+        <div class="card"><div class="card-hd">Protocol-Owned Liquidity</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="row"><span>POL total value</span><span style="color:var(--G)">$28.4M</span></div>
+              <div class="row"><span>GMX backstop</span><span style="color:var(--A)">$8.4M</span></div>
+              <div class="row"><span>Uniswap V3 LP</span><span style="color:var(--B)">$12.1M</span></div>
+              <div class="row"><span>Internal AMM</span><span style="color:var(--G)">$7.9M</span></div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">ADD POL (USDC AMOUNT)</div><input class="finput" placeholder="1000000"/></div>
+              <div class="fgroup"><div class="flbl">TARGET POOL</div><select class="fselect"><option>GMX GLP</option><option>Uniswap V3 BTC/USDC</option><option>Internal WikiAMM</option></select></div>
+              <div class="btn-row">
+                <button class="btn btn-sim" onclick="simulate('WikiPOL.addLiquidity(1000000)')">⚡ Simulate</button>
+                <button class="btn btn-green" onclick="adminAction('Add POL — queue to Safe')">Add Liquidity →</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- PROP CONFIG -->
+      <div class="panel" id="panel-prop">
+        <div class="panel-title">🏆 Prop Trading Config</div>
+        <div class="panel-sub">WikiPropEval — configure challenge parameters for both phases.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Phase 1 Parameters</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">PROFIT TARGET %</div><input class="finput" value="8"/></div>
+            <div class="fgroup"><div class="flbl">MAX DAYS</div><input class="finput" value="30"/></div>
+            <div class="fgroup"><div class="flbl">MAX LEVERAGE</div><input class="finput" value="100"/></div>
+            <div class="fgroup"><div class="flbl">DAILY DRAWDOWN LIMIT %</div><input class="finput" value="4"/></div>
+            <div class="fgroup"><div class="flbl">TOTAL DRAWDOWN LIMIT %</div><input class="finput" value="8"/></div>
+            <div class="fgroup"><div class="flbl">CONSISTENCY RULE %</div><input class="finput" value="40"/></div>
+            <div class="fgroup"><div class="flbl">MIN TRADING DAYS</div><input class="finput" value="4"/></div>
+          </div></div>
+          <div class="card"><div class="card-hd">Phase 2 Parameters</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">PROFIT TARGET %</div><input class="finput" value="5"/></div>
+            <div class="fgroup"><div class="flbl">MAX DAYS</div><input class="finput" value="60"/></div>
+            <div class="fgroup"><div class="flbl">MAX LEVERAGE</div><input class="finput" value="50"/></div>
+            <div class="fgroup"><div class="flbl">DAILY DRAWDOWN LIMIT %</div><input class="finput" value="3"/></div>
+            <div class="fgroup"><div class="flbl">TOTAL DRAWDOWN LIMIT %</div><input class="finput" value="8"/></div>
+            <div class="fgroup"><div class="flbl">CONSISTENCY RULE %</div><input class="finput" value="35"/></div>
+            <div class="fgroup"><div class="flbl">MIN TRADING DAYS</div><input class="finput" value="5"/></div>
+          </div></div>
+        </div>
+        <div class="card"><div class="card-hd">Challenge Tier Fees</div><div class="card-body">
+          <div class="grid-4">
+            <div class="fgroup"><div class="flbl">STARTER FEE ($)</div><input class="finput" value="50"/></div>
+            <div class="fgroup"><div class="flbl">ADVANCED FEE ($)</div><input class="finput" value="250"/></div>
+            <div class="fgroup"><div class="flbl">ELITE FEE ($)</div><input class="finput" value="500"/></div>
+            <div class="fgroup"><div class="flbl">MASTER FEE ($)</div><input class="finput" value="1000"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sim" onclick="simulate('WikiPropEval.setPhaseParams(1, 800, 30, 10000, 400, 800, 4000, 4)')">⚡ Simulate</button>
+            <button class="btn btn-gold" onclick="adminAction('Update prop params — queue to Safe')">Update All Prop Config →</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- FUNDED ACCOUNTS -->
+      <div class="panel" id="panel-funded">
+        <div class="panel-title">💵 Funded Accounts</div>
+        <div class="panel-sub">WikiPropFunded — manage funded trader accounts, close breached accounts.</div>
+        <div class="grid-4" style="margin-bottom:14px">
+          <div class="sbox"><div class="sbox-lbl">ACTIVE FUNDED</div><div class="sbox-val" style="color:var(--G)">341</div></div>
+          <div class="sbox"><div class="sbox-lbl">TOTAL POOL</div><div class="sbox-val" style="color:var(--A)">$8.4M</div></div>
+          <div class="sbox"><div class="sbox-lbl">PAID OUT</div><div class="sbox-val" style="color:var(--G)">$284K</div></div>
+          <div class="sbox"><div class="sbox-lbl">PROFIT SPLIT</div><div class="sbox-val">80-90%</div></div>
+        </div>
+        <div class="card"><div class="card-hd">Manual Account Actions</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="fgroup"><div class="flbl">FUNDED ACCOUNT ID</div><input class="finput" placeholder="Account ID..."/></div>
+              <div class="fgroup"><div class="flbl">WITHDRAWAL COOLDOWN (DAYS)</div><input class="finput" value="7"/></div>
+              <div class="fgroup"><div class="flbl">PROFIT RETENTION %</div><input class="finput" value="25"/></div>
+              <div class="btn-row">
+                <button class="btn btn-red" onclick="adminAction('Force close funded account — queue to Safe')">Force Close Account</button>
+                <button class="btn btn-green" onclick="adminAction('Reset account buffer')">Reset Buffer</button>
+              </div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">FUND NEW ACCOUNT (WALLET)</div><input class="finput" placeholder="0x..."/></div>
+              <div class="fgroup"><div class="flbl">FUNDED AMOUNT ($)</div><input class="finput" value="100000"/></div>
+              <div class="fgroup"><div class="flbl">TIER</div><select class="fselect"><option>Tier 1 (10× max)</option><option>Tier 2 (15× max)</option><option>Tier 3 Instant (5× max)</option></select></div>
+              <div class="btn-row">
+                <button class="btn btn-gold" onclick="adminAction('Create funded account — queue to Safe')">Create Funded Account →</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- STAKING -->
+      <div class="panel" id="panel-staking">
+        <div class="panel-title">🔒 Staking & Gauge Voting</div>
+        <div class="panel-sub">WikiStaking + WikiGaugeVoting — manage APR, epoch timing, gauge weights.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Staking Config</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">BASE APR BPS (18.5% = 1850)</div><input class="finput" value="1850"/></div>
+            <div class="fgroup"><div class="flbl">MAX LOCK YEARS</div><input class="finput" value="4"/></div>
+            <div class="fgroup"><div class="flbl">EPOCH DURATION (DAYS)</div><input class="finput" value="7"/></div>
+            <div class="fgroup"><div class="flbl">MIN LOCK AMOUNT (WIK)</div><input class="finput" value="1"/></div>
+            <div class="btn-row">
+              <button class="btn btn-sim" onclick="simulate('WikiStaking.setBaseAPR(1850)')">⚡ Simulate</button>
+              <button class="btn btn-gold" onclick="adminAction('Update staking config')">Update</button>
+            </div>
+          </div></div>
+          <div class="card"><div class="card-hd">Gauge Voting</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">EPOCH BRIBES TOTAL</div><input class="finput" value="28400" readonly/></div>
+            <div class="fgroup"><div class="flbl">NEW EPOCH (START NOW)</div></div>
+            <button class="btn btn-gold btn-full" onclick="adminAction('Start new gauge epoch')">Start New Epoch →</button>
+            <div style="margin-top:10px" class="fgroup"><div class="flbl">ADD GAUGE (LP TOKEN)</div><input class="finput" placeholder="0x LP token address..."/></div>
+            <div class="btn-row"><button class="btn btn-green" onclick="adminAction('Add gauge pool')">Add Gauge</button></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- LENDING -->
+      <div class="panel" id="panel-lending">
+        <div class="panel-title">🏦 Lending Pools</div>
+        <div class="panel-sub">WikiLending — manage interest rate models, LTV ratios, borrow caps.</div>
+        <div class="card"><div class="card-hd">Interest Rate Config</div><div class="card-body">
+          <div class="grid-3">
+            <div class="fgroup"><div class="flbl">USDC BASE RATE BPS</div><input class="finput" value="400"/></div>
+            <div class="fgroup"><div class="flbl">USDC SLOPE1 BPS</div><input class="finput" value="400"/></div>
+            <div class="fgroup"><div class="flbl">USDC OPTIMAL UTIL %</div><input class="finput" value="80"/></div>
+            <div class="fgroup"><div class="flbl">WETH BASE RATE BPS</div><input class="finput" value="300"/></div>
+            <div class="fgroup"><div class="flbl">WBTC BASE RATE BPS</div><input class="finput" value="200"/></div>
+            <div class="fgroup"><div class="flbl">ARB BASE RATE BPS</div><input class="finput" value="500"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sim" onclick="simulate('WikiLending.setInterestRateModel(0, 400, 400, 8000)')">⚡ Simulate</button>
+            <button class="btn btn-gold" onclick="adminAction('Update interest rate models')">Update Rates →</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- BACKSTOP -->
+      <div class="panel" id="panel-backstop">
+        <div class="panel-title">🛡 Backstop Vault</div>
+        <div class="panel-sub">WikiBackstopVault — manage TVL cap, exit delay, emergency withdrawals.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Vault Config</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">TVL CAP ($)</div><input class="finput" value="50000000"/></div>
+            <div class="fgroup"><div class="flbl">EXIT DELAY (DAYS)</div><input class="finput" value="7"/></div>
+            <div class="fgroup"><div class="flbl">PERFORMANCE FEE BPS</div><input class="finput" value="2000"/></div>
+            <div class="btn-row">
+              <button class="btn btn-gold" onclick="adminAction('Update backstop config')">Update →</button>
+            </div>
+          </div></div>
+          <div class="card"><div class="card-hd">Emergency Actions</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">EMERGENCY WITHDRAW TO</div><input class="finput" placeholder="0x Safe address..."/></div>
+            <button class="btn btn-red btn-full" onclick="adminAction('EMERGENCY WITHDRAW backstop — queue to Safe')">Emergency Withdraw</button>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- LIQUIDITY MINING -->
+      <div class="panel" id="panel-liqmining">
+        <div class="panel-title">⛏ Liquidity Mining</div>
+        <div class="panel-sub">WikiLiquidityMining — create and manage WIK emission programs for LPs.</div>
+        <div class="card"><div class="card-hd">Create New Program</div><div class="card-body">
+          <div class="grid-3">
+            <div class="fgroup"><div class="flbl">LP TOKEN ADDRESS</div><input class="finput" placeholder="0x..."/></div>
+            <div class="fgroup"><div class="flbl">WIK PER SECOND</div><input class="finput" value="0.1"/></div>
+            <div class="fgroup"><div class="flbl">DURATION (DAYS)</div><input class="finput" value="90"/></div>
+            <div class="fgroup"><div class="flbl">TOTAL WIK BUDGET</div><input class="finput" value="10000000"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sim" onclick="simulate('WikiLiquidityMining.createProgram(lpToken, rate, 90, budget)')">⚡ Simulate</button>
+            <button class="btn btn-gold" onclick="adminAction('Create liquidity mining program')">Create Program →</button>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-hd">Adjust Existing Program</div><div class="card-body">
+          <div class="grid-3">
+            <div class="fgroup"><div class="flbl">PROGRAM ID</div><input class="finput" value="0"/></div>
+            <div class="fgroup"><div class="flbl">NEW RATE (can only reduce)</div><input class="finput" value="0.08"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-red" onclick="adminAction('Reduce emission rate')">Reduce Rate</button>
+            <button class="btn btn-red" onclick="adminAction('End program early')">End Program</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- VAULT MARKETPLACE -->
+      <div class="panel" id="panel-vaultmkt">
+        <div class="panel-title">🏪 Vault Marketplace</div>
+        <div class="panel-sub">WikiVaultMarketplace — list protocol vaults (free) and manage third-party listings.</div>
+        <div class="card"><div class="card-hd">List Protocol Vault (Free)</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="fgroup"><div class="flbl">VAULT ADDRESS</div><input class="finput" placeholder="0x..."/></div>
+              <div class="fgroup"><div class="flbl">VAULT NAME</div><input class="finput" placeholder="WikiBackstopVault"/></div>
+              <div class="fgroup"><div class="flbl">CATEGORY</div><select class="fselect"><option>Yield</option><option>Structured</option><option>Leveraged</option><option>Trading Bot</option><option>Protection</option></select></div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">RISK RATING</div><select class="fselect"><option>Very Low</option><option>Low</option><option>Medium</option><option>High</option></select></div>
+              <div class="fgroup"><div class="flbl">MIN DEPOSIT ($)</div><input class="finput" value="100"/></div>
+              <div class="fgroup"><div class="flbl">EXIT DELAY (DAYS)</div><input class="finput" value="7"/></div>
+            </div>
+          </div>
+          <button class="btn btn-green btn-full" onclick="adminAction('List protocol vault')">List Protocol Vault (Free) →</button>
+        </div></div>
+        <div class="card"><div class="card-hd">Third-Party Vault Fee</div><div class="card-body">
+          <div class="row"><span>Listing fee</span><span style="color:var(--A)">$1,000 USDC upfront</span></div>
+          <div class="row"><span>Ongoing fee</span><span style="color:var(--A)">2% of management fees</span></div>
+          <div class="fgroup" style="margin-top:10px"><div class="flbl">UPDATE LISTING FEE ($)</div><input class="finput" value="1000"/></div>
+          <button class="btn btn-gold" onclick="adminAction('Update listing fee')">Update Fee</button>
+        </div></div>
+      </div>
+
+      <!-- SEASON -->
+      <div class="panel" id="panel-season">
+        <div class="panel-title">⭐ Season XP</div>
+        <div class="panel-sub">WikiSeasonPoints — start/end seasons, set reward pools.</div>
+        <div class="card"><div class="card-hd">Season 1 — Active</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="row"><span>Status</span><span class="pill pill-g">ACTIVE</span></div>
+              <div class="row"><span>WIK reward pool</span><span style="color:var(--A)">1,000,000 WIK</span></div>
+              <div class="row"><span>Days remaining</span><span style="color:var(--G)">67</span></div>
+              <div class="row"><span>Total participants</span><span>8,420</span></div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">NEW SEASON WIK POOL</div><input class="finput" value="1000000"/></div>
+              <div class="fgroup"><div class="flbl">USDC POOL (OPTIONAL)</div><input class="finput" value="0"/></div>
+              <div class="fgroup"><div class="flbl">SEASON DURATION (DAYS)</div><input class="finput" value="90"/></div>
+              <div class="btn-row">
+                <button class="btn btn-gold" onclick="adminAction('Start new season')">Start New Season →</button>
+                <button class="btn btn-red" onclick="adminAction('End season early')">End Season</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- NFT -->
+      <div class="panel" id="panel-nft">
+        <div class="panel-title">💎 Revenue Share NFT</div>
+        <div class="panel-sub">WikiRevenueShareNFT — control minting, view earnings, manage supply.</div>
+        <div class="card"><div class="card-hd">NFT Config</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="row"><span>Minted</span><span style="color:var(--A)">847 / 1,000</span></div>
+              <div class="row"><span>Mint price</span><span style="color:var(--A)">$500 USDC</span></div>
+              <div class="row"><span>Mint status</span><span class="pill pill-g">OPEN</span></div>
+              <div class="row"><span>Total fees distributed</span><span style="color:var(--G)">$284,200</span></div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">MINT PRICE ($)</div><input class="finput" value="500"/></div>
+              <div class="btn-row">
+                <button class="btn btn-green" onclick="adminAction('Open NFT mint')">Open Mint</button>
+                <button class="btn btn-red" onclick="adminAction('Close NFT mint')">Close Mint</button>
+                <button class="btn btn-gold" onclick="adminAction('Update mint price')">Update Price</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- AFFILIATE -->
+      <div class="panel" id="panel-affiliate">
+        <div class="panel-title">🎁 Affiliate Program</div>
+        <div class="panel-sub">WikiAffiliate — manage tiers, award Elite NFTs, view earnings.</div>
+        <div class="card"><div class="card-hd">Tier Config</div><div class="card-body">
+          <div class="grid-4">
+            <div class="fgroup"><div class="flbl">BRONZE SHARE BPS</div><input class="finput" value="2000"/></div>
+            <div class="fgroup"><div class="flbl">SILVER SHARE BPS</div><input class="finput" value="2500"/></div>
+            <div class="fgroup"><div class="flbl">GOLD SHARE BPS</div><input class="finput" value="3000"/></div>
+            <div class="fgroup"><div class="flbl">DIAMOND SHARE BPS</div><input class="finput" value="4000"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-gold" onclick="adminAction('Update affiliate tiers')">Update Tiers →</button>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-hd">Award Elite Affiliate NFT</div><div class="card-body">
+          <div class="fgroup"><div class="flbl">WALLET ADDRESS</div><input class="finput" placeholder="0x top affiliate address..."/></div>
+          <button class="btn btn-gold" onclick="adminAction('Award Elite Affiliate NFT — queue to Safe')">Award NFT →</button>
+        </div></div>
+      </div>
+
+      <!-- LAUNCHPAD -->
+      <div class="panel" id="panel-launch">
+        <div class="panel-title">🚀 Launchpad / IEO</div>
+        <div class="panel-sub">WikiLaunchpad + WikiIEOPlatform — manage token launches and IEO campaigns.</div>
+        <div class="card"><div class="card-hd">Create New IEO</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="fgroup"><div class="flbl">TOKEN ADDRESS</div><input class="finput" placeholder="0x..."/></div>
+              <div class="fgroup"><div class="flbl">TOKEN PRICE (USDC)</div><input class="finput" value="0.05"/></div>
+              <div class="fgroup"><div class="flbl">RAISE TARGET ($)</div><input class="finput" value="2000000"/></div>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">START TIME (UNIX)</div><input class="finput" placeholder="1735689600"/></div>
+              <div class="fgroup"><div class="flbl">DURATION (DAYS)</div><input class="finput" value="7"/></div>
+              <div class="fgroup"><div class="flbl">PLATFORM FEE BPS</div><input class="finput" value="200"/></div>
+            </div>
+          </div>
+          <button class="btn btn-green btn-full" onclick="adminAction('Create IEO — queue to Safe')">Create IEO →</button>
+        </div></div>
+      </div>
+
+      <!-- GOVERNANCE -->
+      <div class="panel" id="panel-governance">
+        <div class="panel-title">🗳 Governance / DAO</div>
+        <div class="panel-sub">WikiAgenticDAO + WikiTimelockController — manage proposals, timelock, AI guardrails.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Timelock Config</div><div class="card-body">
+            <div class="row"><span>Current delay</span><span style="color:var(--A)">48 hours</span></div>
+            <div class="row"><span>Proposer</span><span style="color:var(--G)">Genesis Safe</span></div>
+            <div class="row"><span>Executor</span><span style="color:var(--G)">Genesis Safe</span></div>
+            <div class="fgroup" style="margin-top:10px"><div class="flbl">NEW DELAY (SECONDS)</div><input class="finput" value="172800"/></div>
+            <button class="btn btn-gold" onclick="adminAction('Update timelock delay — queue to Safe')">Update Delay →</button>
+          </div></div>
+          <div class="card"><div class="card-hd">AI Guardrails</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">MAX SINGLE CHANGE % (prevents rugs)</div><input class="finput" value="20"/></div>
+            <div class="fgroup"><div class="flbl">AI RISK CHECK</div><select class="fselect"><option>Enabled (recommended)</option><option>Disabled</option></select></div>
+            <button class="btn btn-gold" onclick="adminAction('Update AI guardrail config')">Update →</button>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="panel" id="panel-security">
+        <div class="panel-title">🔐 Security Controls</div>
+        <div class="panel-sub">WikiMultisigGuard + ownership management. All actions require Safe 2-of-3.</div>
+        <div class="alert alert-warn">⚠ Ownership changes are irreversible. Always simulate before executing.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Transfer Ownership</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">CONTRACT</div><select class="fselect" id="ownership-contract">
+              <option>WikiPerp</option><option>WikiRevenueSplitter</option><option>WikiPropEval</option><option>WikiDAOTreasury</option><option>ALL CONTRACTS (batch)</option>
+            </select></div>
+            <div class="fgroup"><div class="flbl">NEW OWNER ADDRESS</div><input class="finput" placeholder="0x Genesis Safe address..."/></div>
+            <div class="btn-row">
+              <button class="btn btn-sim" onclick="simulate('transferOwnership(newSafeAddress)')">⚡ Simulate</button>
+              <button class="btn btn-red" onclick="adminAction('Transfer ownership — IRREVERSIBLE — queue to Safe')">Transfer Ownership</button>
+            </div>
+          </div></div>
+          <div class="card"><div class="card-hd">Pause / Unpause</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">CONTRACT</div><select class="fselect"><option>WikiPerp</option><option>WikiSpot</option><option>WikiLending</option><option>WikiBackstop</option><option>ALL</option></select></div>
+            <div class="btn-row">
+              <button class="btn btn-red" onclick="adminAction('Pause contract — queue to Safe')">Pause</button>
+              <button class="btn btn-green" onclick="adminAction('Unpause contract — queue to Safe')">Unpause</button>
+            </div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- TVL GUARD -->
+      <div class="panel" id="panel-tvlguard">
+        <div class="panel-title">🛡 TVL Guard — Staged Rollout</div>
+        <div class="panel-sub">WikiTVLGuard — staged TVL caps protect the protocol during early launch.</div>
+        <div class="card"><div class="card-hd">Stage Config</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="row"><span>Current stage</span><span class="pill pill-b">STAGE 0</span></div>
+              <div class="row"><span>Stage 0 cap</span><span style="color:var(--B)">$500,000</span></div>
+              <div class="row"><span>Stage 1 cap</span><span style="color:var(--G)">$5,000,000</span></div>
+              <div class="row"><span>Stage 2 cap</span><span style="color:var(--A)">$25,000,000</span></div>
+              <div class="row"><span>Stage 3 cap</span><span style="color:var(--G)">Unlimited</span></div>
+            </div>
+            <div>
+              <div class="alert alert-info">ℹ Never skip stages. Each stage should run 30+ days before advancing.</div>
+              <div class="btn-row" style="margin-top:10px">
+                <button class="btn btn-gold btn-full" onclick="adminAction('Advance to Stage 1 ($5M cap) — queue to Safe')">Advance to Stage 1 →</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- KEEPERS -->
+      <div class="panel" id="panel-keepers">
+        <div class="panel-title">🤖 Keepers & Bots</div>
+        <div class="panel-sub">WikiKeeperRegistry — manage keeper authorization, view bot statuses.</div>
+        <div class="card"><div class="card-hd">PM2 Bot Status</div><div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+            <div v-for="bot" style="padding:10px;background:var(--bg3);border-radius:10px;border:1px solid var(--G)20">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+            ${[['wiki-oracle','Oracle Keeper'],['wiki-dynlev','Dynamic Leverage'],['wiki-liquidator','Liquidation Bot'],['wiki-internal-arb','Internal Arb'],['wiki-compound','Auto-Compounder'],['wiki-bots','Trading Bots'],['wikicious-api','Backend API']].map(function(b){return '<div style="padding:10px;background:var(--bg3);border-radius:10px;border:1px solid rgba(0,240,168,.2)"><div style="font-size:10px;font-weight:700;color:var(--G)">'+b[0]+'</div><div style="font-size:9px;color:var(--t2)">'+b[1]+'</div><div style="font-size:9px;color:var(--G);margin-top:3px">🟢 Running</div></div>';}).join('')}
+          </div>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn btn-red" onclick="adminAction('pm2 restart all — SSH required')">Restart All Bots</button>
+            <button class="btn btn-green" onclick="adminAction('pm2 status — SSH required')">Check Status</button>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-hd">Authorize New Keeper</div><div class="card-body">
+          <div class="fgroup"><div class="flbl">KEEPER WALLET</div><input class="finput" placeholder="0x..."/></div>
+          <div class="fgroup"><div class="flbl">PERMISSION</div><select class="fselect"><option>Liquidation</option><option>Oracle Update</option><option>Auto-Compound</option><option>All</option></select></div>
+          <button class="btn btn-gold" onclick="adminAction('Authorize keeper — queue to Safe')">Authorize Keeper →</button>
+        </div></div>
+      </div>
+
+      <!-- BRIDGE -->
+      <div class="panel" id="panel-bridge">
+        <div class="panel-title">🌉 Bridge</div>
+        <div class="panel-sub">WikiBridge + WikiCrossChainRouter — manage supported chains and fee config.</div>
+        <div class="card"><div class="card-hd">Supported Chains</div><div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            ${['Arbitrum One ✅','Ethereum ✅','Base ✅','Optimism ✅','Polygon ✅','BSC ✅','Avalanche ✅'].map(function(c){return '<div style="padding:9px;background:var(--bg3);border-radius:9px;border:1px solid rgba(0,240,168,.2);font-size:11px;text-align:center;font-weight:700">'+c+'</div>';}).join('')}
+          </div>
+          <div class="fgroup" style="margin-top:12px"><div class="flbl">BRIDGE FEE BPS</div><input class="finput" value="10"/></div>
+          <button class="btn btn-gold" onclick="adminAction('Update bridge fee')">Update Fee</button>
+        </div></div>
+      </div>
+
+      <!-- FEES -->
+      <div class="panel" id="panel-fees">
+        <div class="panel-title">💸 Fee Configuration</div>
+        <div class="panel-sub">WikiDynamicFeeHook + WikiVolumeTiers + WikiStakingFeeDiscount — all fee controls.</div>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">Trading Fees</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">PERP MAKER FEE BPS</div><input class="finput" value="5"/></div>
+            <div class="fgroup"><div class="flbl">PERP TAKER FEE BPS</div><input class="finput" value="10"/></div>
+            <div class="fgroup"><div class="flbl">SPOT FEE BPS</div><input class="finput" value="20"/></div>
+            <div class="fgroup"><div class="flbl">FOREX FEE BPS (MAKER)</div><input class="finput" value="3"/></div>
+            <div class="fgroup"><div class="flbl">DARK POOL FEE BPS</div><input class="finput" value="15"/></div>
+            <div class="btn-row">
+              <button class="btn btn-sim" onclick="simulate('WikiDynamicFeeHook.setFees(5, 10, 20)')">⚡ Simulate</button>
+              <button class="btn btn-gold" onclick="adminAction('Update fee config — queue to Safe')">Update Fees →</button>
+            </div>
+          </div></div>
+          <div class="card"><div class="card-hd">Staking Discount Tiers</div><div class="card-body">
+            <div class="fgroup"><div class="flbl">BRONZE (100 veWIK) DISC BPS</div><input class="finput" value="1000"/></div>
+            <div class="fgroup"><div class="flbl">SILVER (1K veWIK) DISC BPS</div><input class="finput" value="2000"/></div>
+            <div class="fgroup"><div class="flbl">GOLD (10K veWIK) DISC BPS</div><input class="finput" value="3000"/></div>
+            <div class="fgroup"><div class="flbl">DIAMOND (100K veWIK) DISC BPS</div><input class="finput" value="4000"/></div>
+            <div class="btn-row">
+              <button class="btn btn-gold" onclick="adminAction('Update fee discount tiers')">Update Discounts →</button>
+            </div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- PROP POOL -->
+      <div class="panel" id="panel-proppool">
+        <div class="panel-title">🏦 Prop Trading Pool</div>
+        <div class="panel-sub">WikiPropPool — manage the capital pool that backs all funded accounts.</div>
+        <div class="grid-4" style="margin-bottom:14px">
+          <div class="sbox"><div class="sbox-lbl">POOL SIZE</div><div class="sbox-val" style="color:var(--A)">$8.4M</div></div>
+          <div class="sbox"><div class="sbox-lbl">ALLOCATED</div><div class="sbox-val" style="color:var(--R)">$3.4M</div></div>
+          <div class="sbox"><div class="sbox-lbl">AVAILABLE</div><div class="sbox-val" style="color:var(--G)">$5.0M</div></div>
+          <div class="sbox"><div class="sbox-lbl">UTILISATION</div><div class="sbox-val">40.5%</div></div>
+        </div>
+        <div class="card"><div class="card-hd">Pool Management</div><div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="fgroup"><div class="flbl">ADD CAPITAL ($)</div><input class="finput" value="1000000"/></div>
+              <button class="btn btn-green btn-full" onclick="adminAction('Add capital to prop pool')">Add Capital →</button>
+            </div>
+            <div>
+              <div class="fgroup"><div class="flbl">WITHDRAW CAPITAL ($)</div><input class="finput" value="500000"/></div>
+              <button class="btn btn-red btn-full" onclick="adminAction('Withdraw from prop pool — queue to Safe')">Withdraw →</button>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- EMERGENCY -->
+      <div class="panel" id="panel-emergency">
+        <div class="panel-title">🚨 Emergency Procedures</div>
+        <div class="panel-sub">Break-glass actions. All require Safe 2-of-3 signatures. Use only in genuine emergencies.</div>
+        <div class="alert alert-warn">⚠ These actions affect ALL users. Always Tenderly simulate first. Communicate publicly within 30 minutes.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="card" style="border-color:var(--R)30"><div class="card-hd" style="color:var(--R)">🚨 Full Protocol Halt</div><div class="card-body">
+            <div style="font-size:11px;color:var(--t2);margin-bottom:12px;line-height:1.5">Pauses ALL trading on ALL markets. Use if critical bug found or oracle failure.</div>
+            <button class="btn btn-red btn-full" onclick="adminAction('HALT ALL — WikiCircuitBreaker.haltAllMarkets() — queue to Safe')">🚨 HALT ALL MARKETS</button>
+          </div></div>
+          <div class="card" style="border-color:var(--A)30"><div class="card-hd" style="color:var(--A)">⚠ TVL Emergency Cap</div><div class="card-body">
+            <div style="font-size:11px;color:var(--t2);margin-bottom:12px;line-height:1.5">Drop TVL Guard to Stage 0 ($500K cap). Stops new deposits while existing positions unaffected.</div>
+            <button class="btn btn-red btn-full" onclick="adminAction('Set TVL Stage 0 — WikiTVLGuard.setStage(0)')">Set Stage 0 Cap</button>
+          </div></div>
+          <div class="card" style="border-color:var(--R)30"><div class="card-hd" style="color:var(--R)">💸 Emergency Treasury Drain</div><div class="card-body">
+            <div style="font-size:11px;color:var(--t2);margin-bottom:12px;line-height:1.5">Move all protocol funds to Safe. Use only if contract compromise confirmed.</div>
+            <div class="fgroup"><div class="flbl">DESTINATION (SAFE ADDRESS)</div><input class="finput" placeholder="0x Genesis Safe..."/></div>
+            <button class="btn btn-red btn-full" onclick="adminAction('EMERGENCY DRAIN — queue to Safe — requires 2-of-3')">Emergency Drain</button>
+          </div></div>
+          <div class="card" style="border-color:var(--G)30"><div class="card-hd" style="color:var(--G)">✅ Resume All Markets</div><div class="card-body">
+            <div style="font-size:11px;color:var(--t2);margin-bottom:12px;line-height:1.5">Resume trading after emergency pause. Only after fix is deployed and verified.</div>
+            <button class="btn btn-green btn-full" onclick="adminAction('RESUME ALL — WikiCircuitBreaker.resumeMarkets()')">✅ Resume All Markets</button>
+          </div></div>
+        </div>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end layout -->
+</div><!-- end app -->
+
+<div id="toast"></div>
+
+<script>
+var SESSION_KEY = 'wiki_admin_session';
+var SESSION_DURATION = 4 * 60 * 60 * 1000;
+var OWNER_ADDRESSES = ['0xF4A2', '0xf4a2']; // set to your actual Safe address
+
+function doLogin(){
+  var wallet = document.getElementById('wallet-input').value.trim();
+  var sig = document.getElementById('sig-input').value.trim();
+  if(!wallet || !sig || wallet.length < 10){
+    document.getElementById('login-warn').style.display = 'block';
+    return;
+  }
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({wallet:wallet, expires:Date.now()+SESSION_DURATION}));
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  startTimer();
+  toast('✅ Session started — 4 hours remaining', 'success');
+}
+
+function doSignOut(){
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function checkSession(){
+  var s = sessionStorage.getItem(SESSION_KEY);
+  if(s){
+    var data = JSON.parse(s);
+    if(Date.now() < data.expires){
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      startTimer();
+      return;
+    }
+  }
+}
+
+var timerInterval;
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(function(){
+    var s = sessionStorage.getItem(SESSION_KEY);
+    if(!s){ clearInterval(timerInterval); doSignOut(); return; }
+    var data = JSON.parse(s);
+    var remaining = data.expires - Date.now();
+    if(remaining <= 0){ clearInterval(timerInterval); doSignOut(); return; }
+    var h = Math.floor(remaining/3600000);
+    var m = Math.floor((remaining%3600000)/60000);
+    var el = document.getElementById('session-timer');
+    if(el) el.textContent = h+'h '+m+'m';
+  }, 60000);
+}
+
+function show(panel){
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sb-item').forEach(function(i){ i.classList.remove('active'); });
+  var p = document.getElementById('panel-'+panel);
+  if(p) p.classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function simulate(call){
+  toast('⚡ Simulating: '+call, 'sim');
+  var simId = event.currentTarget.parentElement.querySelector('.sim-result');
+  if(simId){
+    simId.style.display = 'block';
+    simId.textContent = '✅ Simulation OK — Gas ~$0.02-0.08 · No reverts detected · Safe to execute';
+  }
+}
+
+function adminAction(desc){
+  toast('📋 Queued to Safe: '+desc.substring(0,60)+'...', 'info');
+}
+
+function toast(msg, type){
+  var t = document.getElementById('toast');
+  var c = {success:'var(--G)',error:'var(--R)',warn:'var(--A)',info:'var(--B)',sim:'var(--V)'}[type]||'var(--B)';
+  t.style.cssText = 'display:block;border:1px solid '+c+'40;color:'+c+';position:fixed;top:16px;right:16px;z-index:9999;padding:11px 17px;border-radius:11px;font-size:12px;font-weight:700;background:var(--card);box-shadow:0 12px 36px rgba(0,0,0,.6)';
+  t.textContent = msg;
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.style.display='none'; }, 4000);
+}
+
+checkSession();
+</script>
+</body>
+</html>

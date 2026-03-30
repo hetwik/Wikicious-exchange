@@ -1,0 +1,420 @@
+{
+  "info": {
+    "name": "Wikicious Exchange API",
+    "description": "Complete API test suite for Wikicious perpetuals exchange. Run against http://localhost:3001 or https://api.wikicious.io",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "4.0.0"
+  },
+  "variable": [
+    { "key": "base_url",   "value": "http://localhost:3001" },
+    { "key": "jwt_token",  "value": "" },
+    { "key": "wallet",     "value": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" },
+    { "key": "bot_id",     "value": "" },
+    { "key": "sub_id",     "value": "" },
+    { "key": "position_id","value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{jwt_token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.test('Has token', () => { const d = pm.response.json(); pm.expect(d.token).to.be.a('string'); pm.collectionVariables.set('jwt_token', d.token); });"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/auth/register",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"email\":\"test@wikicious.io\",\"password\":\"Test123!@#\",\"username\":\"testtrader\",\"wallet\":\"{{wallet}}\"}" }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has token', () => { const d = pm.response.json(); pm.expect(d.token).to.be.a('string'); pm.collectionVariables.set('jwt_token', d.token); });",
+            "pm.test('Has user object', () => { const d = pm.response.json(); pm.expect(d.user).to.have.property('id'); });"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/auth/login",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"email\":\"test@wikicious.io\",\"password\":\"Test123!@#\"}" }
+          }
+        },
+        {
+          "name": "Get Me (auth required)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has wallet', () => pm.expect(pm.response.json().wallet_address).to.be.a('string'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/auth/me" }
+        },
+        {
+          "name": "Login - wrong password",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 401', () => pm.response.to.have.status(401));"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/auth/login",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"email\":\"test@wikicious.io\",\"password\":\"wrongpass\"}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Markets",
+      "item": [
+        {
+          "name": "Get All Markets",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Markets array', () => { const d = pm.response.json(); pm.expect(d.markets).to.be.an('array').with.length.greaterThan(0); });",
+            "pm.test('BTCUSDT exists', () => { const d = pm.response.json(); pm.expect(d.markets.some(m => m.symbol === 'BTCUSDT')).to.be.true; });",
+            "pm.test('Market has required fields', () => { const m = pm.response.json().markets[0]; pm.expect(m).to.have.all.keys(['symbol','price','change24h','volume24h','openInterest']); });"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/markets/all" }
+        },
+        {
+          "name": "Get Market by ID",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has price', () => pm.expect(pm.response.json().price).to.be.a('string'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/markets/0" }
+        },
+        {
+          "name": "Market Hours Status",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has open field', () => pm.expect(pm.response.json()).to.have.property('isOpen'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/markets/hours/status" }
+        },
+        {
+          "name": "Oracle Health",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/markets/oracle/health" }
+        }
+      ]
+    },
+    {
+      "name": "Trading",
+      "item": [
+        {
+          "name": "Place Market Order - Long",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+            "pm.test('Has tx or orderId', () => { const d = pm.response.json(); pm.expect(d.txHash || d.orderId || d.positionId).to.exist; });"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/trade/order",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"marketIndex\":0,\"isLong\":true,\"collateral\":\"100000000\",\"leverage\":5,\"orderType\":\"market\"}" }
+          }
+        },
+        {
+          "name": "Place Limit Order",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/trade/order",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"marketIndex\":0,\"isLong\":true,\"collateral\":\"100000000\",\"leverage\":3,\"orderType\":\"limit\",\"limitPrice\":\"48000000000000000000000\"}" }
+          }
+        },
+        {
+          "name": "Get My Positions",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Positions array', () => pm.expect(pm.response.json().positions).to.be.an('array'));",
+            "pm.test('Positions have required fields', () => { const ps = pm.response.json().positions; if (ps.length > 0) { pm.expect(ps[0]).to.have.property('id'); pm.expect(ps[0]).to.have.property('symbol'); pm.expect(ps[0]).to.have.property('isLong'); pm.collectionVariables.set('position_id', ps[0].id); } });"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/trade/positions/{{wallet}}" }
+        },
+        {
+          "name": "Get My Orders",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Orders array', () => pm.expect(pm.response.json().orders).to.be.an('array'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/trade/orders/{{wallet}}" }
+        },
+        {
+          "name": "Get Trade History",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Trades array', () => pm.expect(pm.response.json().trades).to.be.an('array'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/trade/history/{{wallet}}?limit=20" }
+        }
+      ]
+    },
+    {
+      "name": "Pool (AMM)",
+      "item": [
+        {
+          "name": "Get Pool Stats",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has AUM', () => pm.expect(pm.response.json()).to.have.property('aum'));",
+            "pm.test('Has WLP price', () => pm.expect(pm.response.json()).to.have.property('wlpPrice'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/pool/stats" }
+        },
+        {
+          "name": "Get My Pool Position",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/pool/position/{{wallet}}" }
+        }
+      ]
+    },
+    {
+      "name": "Bots",
+      "item": [
+        {
+          "name": "Get All Strategy Templates",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Returns array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+            "pm.test('Has 5+ strategies', () => pm.expect(pm.response.json().length).to.be.gte(5));",
+            "pm.test('Strategies have required fields', () => { const s = pm.response.json()[0]; pm.expect(s).to.have.all.keys(['key','name','description','bestFor','risk','params']); });"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/bots/strategies" }
+        },
+        {
+          "name": "Create RSI Bot",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.test('Has botId', () => { const d = pm.response.json(); pm.expect(d.botId || d.id).to.be.a('string'); pm.collectionVariables.set('bot_id', d.botId || d.id); });"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/bots",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"type\":\"rsi\",\"symbol\":\"BTCUSDT\",\"marketIndex\":0,\"wallet\":\"{{wallet}}\",\"config\":{\"tradeSize\":50,\"leverage\":5,\"rsiPeriod\":14,\"oversoldLevel\":30,\"overboughtLevel\":70,\"stopLossPct\":3}}" }
+          }
+        },
+        {
+          "name": "Create Grid Bot",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/bots",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"type\":\"grid\",\"symbol\":\"BTCUSDT\",\"marketIndex\":0,\"wallet\":\"{{wallet}}\",\"config\":{\"lowerPrice\":45000,\"upperPrice\":55000,\"gridCount\":10,\"totalCapital\":500,\"leverage\":2}}" }
+          }
+        },
+        {
+          "name": "Create MACD Bot",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/bots",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"type\":\"macd\",\"symbol\":\"ETHUSDT\",\"marketIndex\":1,\"wallet\":\"{{wallet}}\",\"config\":{\"tradeSize\":100,\"leverage\":5,\"fastPeriod\":12,\"slowPeriod\":26,\"signalPeriod\":9,\"stopLossPct\":2}}" }
+          }
+        },
+        {
+          "name": "List My Bots",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Bots array', () => pm.expect(pm.response.json().bots).to.be.an('array'));",
+            "pm.test('Has created bot', () => pm.expect(pm.response.json().bots.length).to.be.gte(1));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/bots" }
+        },
+        {
+          "name": "Start Bot",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Status running', () => pm.expect(pm.response.json().status).to.equal('running'));"
+          ]}}],
+          "request": { "method": "PATCH", "url": "{{base_url}}/api/bots/{{bot_id}}/start" }
+        },
+        {
+          "name": "Pause Bot",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Status paused', () => pm.expect(pm.response.json().status).to.equal('paused'));"
+          ]}}],
+          "request": { "method": "PATCH", "url": "{{base_url}}/api/bots/{{bot_id}}/pause" }
+        },
+        {
+          "name": "Update Bot Config (while paused)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/api/bots/{{bot_id}}/config",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"tradeSize\":75,\"leverage\":3}" }
+          }
+        },
+        {
+          "name": "Get Bot Trade History",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Trades array', () => pm.expect(pm.response.json().trades).to.be.an('array'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/bots/{{bot_id}}/trades" }
+        },
+        {
+          "name": "Delete Bot",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));"
+          ]}}],
+          "request": { "method": "DELETE", "url": "{{base_url}}/api/bots/{{bot_id}}" }
+        },
+        {
+          "name": "Cannot update running bot",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 400', () => pm.response.to.have.status(400));",
+            "pm.test('Error message', () => pm.expect(pm.response.json().error).to.include('Stop'));"
+          ]}}],
+          "request": {
+            "method": "PATCH", "url": "{{base_url}}/api/bots/{{bot_id}}/config",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"tradeSize\":999}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Copy Trading",
+      "item": [
+        {
+          "name": "Get Master Traders",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('8 masters', () => pm.expect(pm.response.json().masters.length).to.equal(8));",
+            "pm.test('Sorted by monthly PnL', () => { const ms = pm.response.json().masters; pm.expect(ms[0].monthly_pnl).to.be.gte(ms[1].monthly_pnl); });",
+            "pm.test('Masters have required fields', () => { const m = pm.response.json().masters[0]; pm.expect(m).to.have.all.keys(['address','username','win_rate','monthly_pnl','total_pnl','risk_score','verified','followers']); });"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/copy/masters" }
+        },
+        {
+          "name": "Get Master Detail",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has username', () => pm.expect(pm.response.json().username).to.be.a('string'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/copy/masters/0x6666666666666666666666666666666666666666" }
+        },
+        {
+          "name": "Subscribe to Master",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.test('Has subscriptionId', () => { const d = pm.response.json(); pm.expect(d.subscriptionId).to.be.a('string'); pm.collectionVariables.set('sub_id', d.subscriptionId); });"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/copy/subscribe",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"masterAddress\":\"0x6666666666666666666666666666666666666666\",\"wallet\":\"{{wallet}}\",\"copyRatio\":0.5,\"maxTradeSize\":200,\"copySl\":true,\"copyTp\":true}" }
+          }
+        },
+        {
+          "name": "Cannot subscribe twice to same master",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 400', () => pm.response.to.have.status(400));",
+            "pm.test('Error about duplicate', () => pm.expect(pm.response.json().error).to.include('subscribed'));"
+          ]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/api/copy/subscribe",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\"masterAddress\":\"0x6666666666666666666666666666666666666666\",\"wallet\":\"{{wallet}}\",\"copyRatio\":1.0,\"maxTradeSize\":100,\"copySl\":true,\"copyTp\":true}" }
+          }
+        },
+        {
+          "name": "Get My Subscriptions",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has active subscription', () => { const ss = pm.response.json().subscriptions; pm.expect(ss.filter(s => s.status === 'active').length).to.be.gte(1); });"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/copy/subscriptions" }
+        },
+        {
+          "name": "Get Copy Trade History",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Trades array', () => pm.expect(pm.response.json().trades).to.be.an('array'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/copy/trades/{{sub_id}}" }
+        },
+        {
+          "name": "Unsubscribe from Master",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Success', () => pm.expect(pm.response.json().success).to.be.true);"
+          ]}}],
+          "request": { "method": "DELETE", "url": "{{base_url}}/api/copy/subscribe/{{sub_id}}" }
+        }
+      ]
+    },
+    {
+      "name": "Social",
+      "item": [
+        {
+          "name": "Get Leaderboard",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has traders', () => pm.expect(pm.response.json().traders).to.be.an('array'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/social/leaderboard?limit=10" }
+        },
+        {
+          "name": "Get Feed",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Has posts', () => pm.expect(pm.response.json().posts).to.be.an('array'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/api/social/feed?limit=20" }
+        }
+      ]
+    },
+    {
+      "name": "Health & Monitoring",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Status ok', () => pm.expect(pm.response.json().status).to.equal('ok'));",
+            "pm.test('Response time < 500ms', () => pm.expect(pm.response.responseTime).to.be.lt(500));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/health" }
+        },
+        {
+          "name": "Health Check - Response Fields",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Has db field', () => pm.expect(pm.response.json()).to.have.property('db'));",
+            "pm.test('Has chain field', () => pm.expect(pm.response.json()).to.have.property('chain'));",
+            "pm.test('Has uptime', () => pm.expect(pm.response.json().uptime).to.be.a('number'));"
+          ]}}],
+          "request": { "method": "GET", "url": "{{base_url}}/health" }
+        },
+        {
+          "name": "Unauthenticated access rejected",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 401', () => pm.response.to.have.status(401));"
+          ]}}],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET", "url": "{{base_url}}/api/bots"
+          }
+        }
+      ]
+    }
+  ]
+}

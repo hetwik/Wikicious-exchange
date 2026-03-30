@@ -1,0 +1,80 @@
+name: wikicious_v5
+description: Wikicious V5 — The most advanced DEX on Arbitrum
+publish_to: none
+version: 5.0.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ── State Management ──────────────────────────────────────────
+  flutter_riverpod:   ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # ── Navigation ────────────────────────────────────────────────
+  go_router: ^14.6.2
+
+  # ── HTTP + WebSocket ──────────────────────────────────────────
+  dio:                ^5.7.0
+  web_socket_channel: ^3.0.1
+
+  # ── Web3 / Wallet ─────────────────────────────────────────────
+  # WalletConnect v2 — sign up at https://cloud.walletconnect.com
+  walletconnect_flutter_v2: ^2.4.2
+  web3dart:                 ^2.7.3
+  bip39:                    ^1.0.6
+  bip32:                    ^2.0.0
+  hex:                      ^0.2.0
+
+  # ── Charts ────────────────────────────────────────────────────
+  fl_chart:     ^0.69.0
+  candlesticks: ^2.1.1
+
+  # ── Storage ───────────────────────────────────────────────────
+  flutter_secure_storage: ^9.2.2
+  shared_preferences:     ^2.3.3
+  hive_flutter:           ^1.1.0
+
+  # ── UI ────────────────────────────────────────────────────────
+  google_fonts:        ^6.2.1
+  flutter_animate:     ^4.5.2
+  shimmer:             ^3.0.0
+  cached_network_image: ^3.4.1
+
+  # ── Auth / Biometrics ─────────────────────────────────────────
+  local_auth: ^2.3.0
+
+  # ── QR Code ───────────────────────────────────────────────────
+  qr_flutter:     ^4.1.0
+  mobile_scanner: ^6.0.2
+
+  # ── Utils ─────────────────────────────────────────────────────
+  intl:             ^0.19.0
+  timeago:          ^3.7.0
+  url_launcher:     ^6.3.1
+  share_plus:       ^10.1.2
+  haptic_feedback:  ^0.5.1+1
+  package_info_plus: ^8.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints:       ^4.0.0
+  riverpod_generator:  ^2.6.1
+  build_runner:        ^2.4.13
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+  fonts:
+    - family: SpaceMono
+      fonts:
+        - asset: assets/fonts/SpaceMono-Regular.ttf
+        - asset: assets/fonts/SpaceMono-Bold.ttf
+          weight: 700

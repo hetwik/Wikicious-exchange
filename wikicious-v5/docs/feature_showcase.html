@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Wikicious V5 — Complete Feature Showcase · 123 Contracts</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#03080F;--bg2:#060D18;--bg3:#090F1E;--card:#0A1525;
+  --b:#0E1E30;--b2:#152840;--b3:#1C3050;
+  --G:#00F5A8;--B:#0085FF;--V:#7B5CF0;--A:#FFB020;--R:#FF3355;--T:#00D4FF;--O:#FF6B35;
+  --t1:#EEF5FF;--t2:#5C7EA0;--t3:#243448;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--t1);cursor:none}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-thumb{background:var(--G)}
+#cur{position:fixed;width:8px;height:8px;border-radius:50%;background:var(--G);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:.08s}
+#cur2{position:fixed;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,245,168,.25);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:.06s}
+
+/* HEADER */
+.hdr{background:rgba(3,8,15,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--b2);padding:13px 36px;position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;gap:9px;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px}
+.lm{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--G),var(--B));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#000}
+.badge{padding:3px 10px;border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:1.5px}
+.green-badge{background:rgba(0,245,168,.1);border:1px solid rgba(0,245,168,.2);color:var(--G)}
+.blue-badge{background:rgba(0,133,255,.1);border:1px solid rgba(0,133,255,.2);color:var(--B)}
+.hdr-right{margin-left:auto;display:flex;gap:7px;align-items:center}
+.vbtn{padding:7px 14px;border-radius:9px;border:1px solid var(--b2);background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:none;transition:all .15s;font-family:'DM Sans',sans-serif}
+.vbtn.on,.vbtn:hover{background:var(--G);color:#000;border-color:var(--G)}
+
+/* CATS */
+.cats{display:flex;gap:6px;padding:12px 36px;overflow-x:auto;border-bottom:1px solid var(--b);position:sticky;top:55px;z-index:100;background:var(--bg2)}
+.cats::-webkit-scrollbar{height:0}
+.cb{padding:6px 14px;border-radius:8px;border:1px solid var(--b2);background:transparent;color:var(--t2);font-size:10px;font-weight:700;cursor:none;white-space:nowrap;transition:all .15s;font-family:'DM Sans',sans-serif}
+.cb.on,.cb:hover{background:var(--B);color:#fff;border-color:var(--B)}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:14px;padding:20px 36px 80px}
+.fc{border-radius:14px;background:var(--card);border:1px solid var(--b2);overflow:hidden;cursor:none;transition:transform .2s,border-color .2s,box-shadow .2s}
+.fc:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.fch{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--b);background:var(--bg3)}
+.fci{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.fcn{font-weight:700;font-size:12px;color:var(--t1);margin-left:8px}
+.fcs{font-size:9px;color:var(--t2);margin-top:1px}
+.ftag{padding:2px 8px;border-radius:100px;font-size:8px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.new-tag{background:rgba(0,245,168,.15);border:1px solid rgba(0,245,168,.3);color:var(--G)}
+
+/* SCREEN HELPERS */
+.scr{background:var(--bg2);height:240px;overflow:hidden;position:relative}
+.bbar{background:var(--bg3);padding:5px 9px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--b)}
+.dots{display:flex;gap:3px}.dot{width:6px;height:6px;border-radius:50%}
+.url{flex:1;background:var(--b);border-radius:3px;padding:2px 7px;font-size:7px;color:var(--t2);font-family:'JetBrains Mono',monospace}
+.sp{background:var(--bg2);padding:8px 10px}
+.row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(14,30,48,.8);font-size:8px}
+.row span:first-child{color:var(--t2)}.row span:last-child{font-family:'JetBrains Mono',monospace;font-weight:500}
+.sbox{background:var(--bg3);border-radius:7px;padding:6px 8px;border:1px solid var(--b)}
+.sbox .l{font-size:6px;color:var(--t2);font-weight:700;letter-spacing:.3px}.sbox .v{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;margin-top:1px}
+.tabs{display:flex;gap:2px;background:#020810;padding:3px;border-radius:8px;margin-bottom:7px}
+.tab{flex:1;text-align:center;padding:5px;border-radius:6px;font-size:8px;font-weight:700;color:var(--t2)}
+.inp{background:var(--bg3);border:1px solid var(--b2);border-radius:8px;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--t1);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.btn{width:100%;padding:9px;border-radius:9px;border:none;font-weight:700;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.prog{height:3px;background:var(--b2);border-radius:2px;overflow:hidden;margin-top:2px}
+.pf{height:100%;border-radius:2px}
+.chart{display:flex;align-items:flex-end;gap:1px;height:44px;background:var(--bg3);border-radius:6px;border:1px solid var(--b);padding:3px;overflow:hidden}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,4,12,.9);backdrop-filter:blur(24px);align-items:center;justify-content:center;padding:16px}
+.modal.open{display:flex}
+.mbox{background:var(--bg2);border:1px solid var(--b2);border-radius:18px;max-width:1080px;width:100%;max-height:92vh;overflow-y:auto;position:relative}
+.mcl{position:absolute;top:10px;right:10px;background:var(--bg3);border:1px solid var(--b2);color:var(--t2);width:26px;height:26px;border-radius:7px;cursor:none;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:5;transition:all .15s}
+.mcl:hover{color:var(--t1)}
+.mhd{padding:16px 20px 12px;border-bottom:1px solid var(--b2);display:flex;align-items:center;gap:11px;background:var(--bg3);border-radius:18px 18px 0 0;position:sticky;top:0;z-index:5}
+.mbdy{display:grid;grid-template-columns:1fr 1fr}
+.mpn{padding:18px}
+.mpn+.mpn{border-left:1px solid var(--b2)}
+.mlbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.mlbl::after{content:'';flex:1;height:1px;background:var(--b)}
+</style>
+</head>
+<body>
+<div id="cur"></div><div id="cur2"></div>
+
+<div class="hdr">
+  <div class="logo"><div class="lm">W</div>Wikicious V5</div>
+  <div class="badge green-badge">123 CONTRACTS</div>
+  <div class="badge blue-badge">ARBITRUM ONE</div>
+  <div class="hdr-right">
+    <button class="vbtn on" onclick="sv('w')">🖥 Web</button>
+    <button class="vbtn" onclick="sv('m')">📱 Mobile</button>
+    <button class="vbtn" onclick="sv('b')">⚡ Both</button>
+    <div style="width:1px;height:18px;background:var(--b);margin:0 4px"></div>
+    <span style="font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace">Click any card to expand</span>
+  </div>
+</div>
+
+<div class="cats" id="cats"></div>
+<div class="grid" id="grid"></div>
+
+<div class="modal" id="modal" onclick="cm(event)">
+  <div class="mbox" id="mbox">
+    <button class="mcl" onclick="cm()">✕</button>
+    <div id="mc"></div>
+  </div>
+</div>
+
+<script>
+// cursor
+const C=document.getElementById('cur'),C2=document.getElementById('cur2');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;C.style.left=mx+'px';C.style.top=my+'px'});
+(function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;C2.style.left=rx+'px';C2.style.top=ry+'px';requestAnimationFrame(a)})();
+
+// helpers
+function ch(s=5,h=44){const d=Array.from({length:22},(_,i)=>Math.max(4,Math.min(92,Math.sin(i*.65+s)*18+Math.cos(i*.42)*8+52)));return`<div class="chart">${d.map((v,i)=>{const up=i%3!==0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><div style="height:${Math.ceil(v*.25)}px;width:1px;background:${up?'#00F5A880':'#FF335580'}"></div><div style="height:${Math.ceil(v*.5)}px;width:80%;background:${up?'#00F5A8CC':'#FF3355CC'};border-radius:1px"></div></div>`}).join('')}</div>`}
+function row(k,v,c='#EEF5FF'){return`<div class="row"><span>${k}</span><span style="color:${c}">${v}</span></div>`}
+function sb(l,v,c='#0085FF'){return`<div class="sbox"><div class="l">${l}</div><div class="v" style="color:${c}">${v}</div></div>`}
+function prog(p,c='#00F5A8'){return`<div class="prog"><div class="pf" style="width:${p}%;background:${c}"></div></div>`}
+function pill(t,c){return`<span style="display:inline-block;padding:1px 7px;border-radius:100px;font-size:7px;font-weight:700;font-family:'JetBrains Mono',monospace;background:${c}18;border:1px solid ${c}30;color:${c}">${t}</span>`}
+function bb(){return`<div class="bbar"><div class="dots"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FFBD2E"></div><div class="dot" style="background:#28C840"></div></div><div class="url">app.wikicious.io/</div></div>`}
+function phone(content,h='100%'){return`<div style="width:160px;height:320px;border-radius:26px;background:linear-gradient(155deg,#101E35,#060D1A);border:2px solid #1C3050;padding:2px;margin:6px auto;position:relative;box-shadow:0 20px 48px rgba(0,0,0,.8)"><div style="position:absolute;top:5px;left:50%;transform:translateX(-50%);width:48px;height:11px;background:var(--bg);border-radius:7px;z-index:5"></div><div style="width:100%;height:100%;border-radius:24px;overflow:hidden;background:var(--bg)">${content}</div></div>`}
+
+// ── ALL FEATURES ──────────────────────────────────────────────────────────────
+const F=[
+
+// TRADING
+{id:'perp',n:'Perpetuals — Up to 1000×',s:'WikiPerp · WikiVirtualAMM · Hybrid routing · 241 crypto markets',i:'📈',c:'#00F5A8',t:'CORE',cat:'TRADING',
+w:`${bb()}<div class="sp"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><select style="background:var(--card);border:1px solid var(--b2);color:var(--t1);padding:2px 6px;border-radius:5px;font-size:9px"><option>BTC/USD Perp</option><option>ETH/USD</option></select><span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#00F5A8">$67,284</span><span style="font-size:9px;color:#00F5A8">+2.14%</span><div style="margin-left:auto">${pill('100× LIVE','#00F5A8')}</div></div>${ch(3)}<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px">${sb('OI LONG','$84.2M','#00F5A8')}${sb('OI SHORT','$62.1M','#FF3355')}${sb('FUND TIER','0→5×','#FFB020')}${sb('ADL','🟢 Safe','#00F5A8')}</div></div>`,
+m:`${phone(`<div style="padding:6px 8px 0"><div style="font-size:11px;font-weight:800;margin-bottom:3px">BTC/USD</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:#00F5A8">$67,284</div>${ch(3,36)}<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:6px">${sb('MAX','1000×','#00D4FF')}${sb('ADL','🟢','#00F5A8')}</div><div style="display:flex;gap:3px;margin-top:6px"><div style="flex:1;padding:7px;border-radius:8px;border:none;background:#00F5A8;color:#000;font-size:9px;font-weight:800;text-align:center">▲ Long</div><div style="flex:1;padding:7px;border-radius:8px;border:none;background:#FF3355;color:#fff;font-size:9px;font-weight:800;text-align:center">▼ Short</div></div></div>`)}`},
+
+{id:'forex',n:'Forex 2000× · Metals · Commodities',s:'WikiForexOracle · 30 forex pairs · 4 metals · 8 commodities · 10 indices',i:'💱',c:'#FFB020',t:'2000×',cat:'TRADING',
+w:`${bb()}<div class="sp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;font-weight:700">Forex · Metals</span>${pill('2000× MAX','#FFB020')}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">${[['EUR/USD','1.0842','+0.12%','#00F5A8'],['GBP/USD','1.2641','+0.08%','#00F5A8'],['USD/JPY','151.42','-0.14%','#FF3355'],['XAU/USD','$2,384','+0.84%','#FFB020'],['XAG/USD','$28.14','+0.62%','#FFB020'],['USD/CHF','0.9012','+0.04%','#00F5A8']].map(([p,pr,ch,c])=>`<div style="background:var(--card);border-radius:8px;padding:6px 8px;border:1px solid var(--b2)"><div style="font-size:9px;font-weight:700">${p}</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${c};font-weight:600">${pr} <span style="font-size:8px">${ch}</span></div></div>`).join('')}</div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px;display:flex;justify-content:space-between"><span>Forex & Metals</span>${pill('2000×','#FFB020')}</div>${[['EUR/USD','1.0842','#00F5A8'],['GBP/USD','1.2641','#00F5A8'],['XAU/USD','$2,384','#FFB020'],['USD/JPY','151.42','#FF3355']].map(([p,v,c])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0E1E30;font-size:8px"><span style="color:var(--t2)">${p}</span><span style="color:${c};font-family:'JetBrains Mono',monospace">${v}</span></div>`).join('')}</div>`)}`},
+
+{id:'darkpool',n:'Dark Pool — Private Large Trades',s:'WikiDarkPool · Commit-reveal · 0.15% fee · $50K minimum · No front-running',i:'🌑',c:'#7B5CF0',t:'NEW',cat:'TRADING',
+w:`${bb()}<div class="sp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;font-weight:700">Dark Pool</span>${pill('0.15% FEE','#7B5CF0')}</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px">${sb('ACTIVE BUYS','12','#00F5A8')}${sb('ACTIVE SELLS','9','#FF3355')}${sb('MIN ORDER','$50K','#7B5CF0')}</div>${[['PHASE','DESCRIPTION','STATUS'],['1 Commit','Submit order hash. No one sees it.','✅ Done'],['2 Reveal','Reveal within 10 blocks.','⏳ Pending'],['3 Match','Keeper matches at midpoint.','⏳ Waiting']].map(([p,d,s])=>p==='PHASE'?`<div class="row"><span style="font-weight:700">PHASE</span><span>DESCRIPTION</span><span>STATUS</span></div>`:row(p+' — '+d,'',s.includes('Done')?'#00F5A8':s.includes('Pending')?'#FFB020':'#5C7EA0')).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🌑 Dark Pool</div>${[['Phase 1 — Commit','Hash submitted','#7B5CF0'],['Phase 2 — Reveal','Within 10 blocks','#FFB020'],['Phase 3 — Match','Midpoint price','#00F5A8']].map(([t,d,c])=>`<div style="padding:6px 7px;background:var(--bg3);border-radius:7px;border-left:2px solid ${c};margin-bottom:4px"><div style="font-size:9px;font-weight:700;color:${c}">${t}</div><div style="font-size:8px;color:var(--t2)">${d}</div></div>`).join('')}</div>`)}`},
+
+{id:'trailing',n:'Trailing Stop + OCO + Guaranteed Stop',s:'WikiTrailingStop · WikiOrderBook · WikiGuaranteedStop · slippage-free exits',i:'🎯',c:'#00D4FF',t:'NEW',cat:'TRADING',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px">${[['🔄 Trailing Stop','Follows market up. Falls 5% from peak → triggers.','5% offset','#00D4FF'],['⚡ OCO Order','TP + SL simultaneously. One fills → other cancels.','Auto-cancel','#7B5CF0'],['🛡 Guaranteed Stop','Pay 0.5% premium. Exit at exact price. No slippage.','0.5% premium','#FFB020']].map(([t,d,v,c])=>`<div style="background:var(--card);border-radius:9px;padding:9px;border:1px solid ${c}20"><div style="font-size:10px;font-weight:700;color:${c};margin-bottom:4px">${t}</div><div style="font-size:8px;color:var(--t2);line-height:1.5;margin-bottom:5px">${d}</div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:${c}">${v}</div></div>`).join('')}</div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">Advanced Orders</div>${[['🔄 Trailing','5% offset below peak','#00D4FF'],['⚡ OCO','TP+SL auto-cancel','#7B5CF0'],['🛡 Guaranteed','0.5% → no slippage','#FFB020']].map(([t,d,c])=>`<div style="padding:6px 7px;background:var(--card);border-radius:8px;border:1px solid ${c}20;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:9px;font-weight:700;color:${c}">${t}</span><span style="font-size:8px;color:var(--t2)">${d}</span></div>`).join('')}</div>`)}`},
+
+{id:'condorder',n:'Conditional / Strategy Orders',s:'WikiConditionalOrder · If-then rules · Price/PnL/health triggers · Recurring',i:'⚙️',c:'#00F5A8',t:'NEW',cat:'TRADING',
+w:`${bb()}<div class="sp"><div style="font-size:9px;font-weight:700;margin-bottom:7px">ACTIVE CONDITIONAL ORDERS</div>${[['IF BTC > $70,000','→ Open ETH Long $1,000 at 5×','#00F5A8'],['IF Position PnL > $500','→ Move stop-loss to break-even','#FFB020'],['IF Health < 20%','→ Close smallest position','#FF3355'],['Every Friday 00:00 UTC','→ Withdraw all profits','#7B5CF0']].map(([c,a,col])=>`<div style="background:var(--card);border-radius:8px;padding:7px 9px;border:1px solid ${col}20;margin-bottom:5px;display:flex;align-items:center;gap:8px"><span style="font-size:11px">🔔</span><div style="flex:1"><div style="font-size:8px;font-weight:700;color:${col}">${c}</div><div style="font-size:8px;color:var(--t2);margin-top:1px">${a}</div></div></div>`).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">⚙️ Conditional Orders</div>${[['BTC > $70K','Open ETH Long 5×','#00F5A8'],['PnL > $500','Move stop to BE','#FFB020'],['Health < 20%','Close position','#FF3355']].map(([c,a,col])=>`<div style="padding:5px 7px;background:var(--card);border-radius:7px;border-left:2px solid ${col};margin-bottom:4px"><div style="font-size:8px;font-weight:700;color:${col}">IF ${c}</div><div style="font-size:7px;color:var(--t2)">${a}</div></div>`).join('')}</div>`)}`},
+
+// SAFETY
+{id:'volmargin',n:'Volatility-Adaptive Margin',s:'WikiVolatilityMargin · TWAP deviation · 4 tiers · Black swan protection · 30min cooldown',i:'📡',c:'#FF6B35',t:'NEW',cat:'SAFETY',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">${[['NORMAL','<2%','1×','#5C7EA0'],['ELEVATED','2-5%','2×','#0085FF'],['HIGH','5-10%','3.5×','#FFB020'],['EXTREME','>10%','5× 🚨','#FF3355']].map(([t,d,m,c])=>`<div style="background:var(--card);border-radius:8px;padding:7px;border:1px solid ${c}25"><div style="font-size:9px;font-weight:700;color:${c}">${t}</div><div style="font-size:7px;color:var(--t2);margin:2px 0">${d} deviation</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${c}">${m}</div></div>`).join('')}</div>${row('Current tier','NORMAL 🟢','#00F5A8')}${row('BTC deviation','0.27% — within NORMAL','#00F5A8')}${row('Max new leverage','100× (no restriction)','#00F5A8')}${row('Black swan mode','Activates at >10%','#FF3355')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">📡 Vol Margin</div>${[['NORMAL','1×','#5C7EA0'],['ELEVATED','2×','#0085FF'],['HIGH','3.5×','#FFB020'],['EXTREME','5× 🚨','#FF3355']].map(([t,m,c])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0E1E30"><span style="font-size:9px;font-weight:700;color:${c}">${t}</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${c}">${m}</span></div>`).join('')}</div>`)}`},
+
+{id:'partialliq',n:'Partial Liquidation Engine',s:'WikiPartialLiquidation · 3-step · Restore health to 50% · 30s delay · Min slippage',i:'⚖️',c:'#7B5CF0',t:'NEW',cat:'SAFETY',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><div style="background:#FF335508;border-radius:8px;padding:8px;border:1px solid #FF335520;margin-bottom:6px"><div style="font-size:9px;font-weight:700;color:#FF3355;margin-bottom:3px">❌ Old: Full Liquidation</div><div style="font-size:8px;color:var(--t2);line-height:1.5">EUR/USD 2000× $1M → entire position dumped → massive slippage</div></div><div style="background:#00F5A808;border-radius:8px;padding:8px;border:1px solid #00F5A820"><div style="font-size:9px;font-weight:700;color:#00F5A8;margin-bottom:3px">✅ New: Partial Liq</div><div style="font-size:8px;color:var(--t2);line-height:1.5">Close only 25% → health restores to 52% → user keeps 75%</div></div></div><div style="background:var(--card);border-radius:9px;padding:10px;border:1px solid var(--b2)">${row('Position','EUR/USD 2000× $500K')}${row('Health score','8% ⚠','#FF3355')}${row('Step 1: close','25% ($125K)','#7B5CF0')}${row('Health after','52% ✅','#00F5A8')}${row('Slippage saved','~$8,750','#00F5A8')}</div></div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">⚖️ Partial Liq</div><div style="padding:7px;background:#7B5CF010;border-radius:8px;border:1px solid #7B5CF025;margin-bottom:5px"><div style="font-size:8px;font-weight:700;color:#7B5CF0;margin-bottom:3px">Health: 8%</div>${prog(8,'#FF3355')}<div style="font-size:8px;color:var(--t2);margin-top:3px">Close 25% → restore to 52%</div></div>${row('Saved from slippage','$8,750','#00F5A8')}</div>`)}`},
+
+{id:'liqprotect',n:'Liquidation Protection Service',s:'WikiLiqProtection · $20-$100/mo · Auto-add margin · Keeper bot · 0.1% fee per add',i:'🛡',c:'#00F5A8',t:'NEW',cat:'SAFETY',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">${[['BASIC','$20/mo','$10K max','#5C7EA0'],['PRO','$50/mo','$100K max','#0085FF'],['ELITE','$100/mo','Unlimited','#FFB020']].map(([t,p,m,c])=>`<div style="background:var(--card);border-radius:8px;padding:8px;border:2px solid ${c}30;text-align:center"><div style="font-size:10px;font-weight:800;color:${c}">${t}</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;margin:3px 0">${p}</div><div style="font-size:8px;color:var(--t2)">${m}</div></div>`).join('')}</div>${row('Your plan','PRO ($50/mo)','#0085FF')}${row('Reserve balance','$2,847.50','#00F5A8')}${row('Total auto-added','$3,200 (6 times)','#00F5A8')}${row('Health threshold','< 15% triggers','#FFB020')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🛡 Liq Protection</div><div style="padding:7px;background:#00F5A808;border-radius:8px;border:1px solid #00F5A820;margin-bottom:5px"><div style="font-size:8px;font-weight:700;color:#00F5A8">PRO Plan — Active</div><div style="font-size:8px;color:var(--t2);margin-top:2px">Reserve: $2,847 · 6 auto-adds</div></div>${row('Trigger','Health < 15%','#FFB020')}${row('Plan fee','$50/month','#0085FF')}</div>`)}`},
+
+// EARN
+{id:'staking',n:'veWIK Staking + Gauge Voting',s:'WikiStaking · WikiGaugeVoting · 18.5% APR · Epoch bribes · 4-year lock',i:'🔒',c:'#0085FF',t:'EARN',cat:'EARN',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">${sb('APR','18.5%','#00F5A8')}${sb('MY veWIK','10,000','#0085FF')}${sb('PENDING','$42.80','#FFB020')}${sb('BRIBES','$28,400','#7B5CF0')}</div>${[['ETH/USDC LP','$12,200','42%','#0085FF'],['WIK/USDC LP','$8,400','35%','#7B5CF0'],['BTC/USDC LP','$5,800','15%','#FFB020']].map(([p,b,v,c])=>`<div style="margin-bottom:5px"><div style="display:flex;justify-content:space-between;margin-bottom:2px;font-size:8px"><span>${p}</span><span style="color:#FFB020;font-family:'JetBrains Mono',monospace">${b} bribe</span></div>${prog(parseInt(v),c)}</div>`).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="text-align:center;margin-bottom:6px"><div style="font-size:7px;color:var(--t2)">STAKING APR</div><div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#00F5A8">18.5%</div></div>${[['ETH/USDC','$12.2K bribe','#0085FF'],['WIK/USDC','$8.4K bribe','#7B5CF0'],['BTC/USDC','$5.8K bribe','#FFB020']].map(([p,b,c])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #0E1E30;font-size:8px"><span style="color:var(--t2)">${p}</span><span style="color:${c};font-family:'JetBrains Mono',monospace">${b}</span></div>`).join('')}</div>`)}`},
+
+{id:'deltaneutral',n:'Delta-Neutral LP Vault (dnUSDC)',s:'WikiDeltaNeutralVault · 11-28% APY · Zero price risk · ERC-20 shares · 7-day exit',i:'⚖️',c:'#00D4FF',t:'NEW',cat:'EARN',
+w:`${bb()}<div class="sp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;font-weight:700">dnUSDC Vault</span>${pill('~18% APY','#00D4FF')}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">${[['Deposit $10K USDC → receive 10K dnUSDC','→ receive 10,000 dnUSDC'],['50% → lending collateral','$5,000 earns ~6% APY'],['50% → short hedge perp','Cancels price exposure'],['Net delta','~$0 (delta neutral ✅)']].map(([k,v])=>row(k,v,'#00D4FF')).join('')}<div></div><div style="background:var(--card);border-radius:8px;padding:8px;border:1px solid #00D4FF20">${[['AMM fees','2-5%','#00F5A8'],['Funding rates','5-15%','#FFB020'],['Lending','4-8%','#0085FF'],['TOTAL','11-28%','#00D4FF']].map(([k,v,c])=>`<div class="row"><span>${k}</span><span style="color:${c}">${v} APY</span></div>`).join('')}</div></div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="text-align:center;margin-bottom:6px"><div style="font-size:7px;color:var(--t2)">DELTA-NEUTRAL APY</div><div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#00D4FF">~18%</div><div style="font-size:8px;color:var(--t2)">Zero directional risk</div></div>${[['AMM fees','2-5%','#00F5A8'],['Funding','5-15%','#FFB020'],['Lending','4-8%','#0085FF']].map(([k,v,c])=>row(k,v,c)).join('')}</div>`)}`},
+
+{id:'structprod',n:'Structured Products — Covered Call Vaults',s:'WikiStructuredProduct · Ribbon-style · Auto-rolling · 8-52% APY · Mgmt+perf fees',i:'🏛',c:'#7B5CF0',t:'NEW',cat:'EARN',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">${[['Covered Call','Deposit ETH → sell calls weekly','~12% APY','#7B5CF0'],['Cash-Sec Put','Deposit USDC → sell puts','~8% APY','#0085FF'],['Principal Prot','90% safe + 10% upside lottery','~5-20%','#00F5A8']].map(([t,d,a,c])=>`<div style="background:var(--card);border-radius:8px;padding:8px;border:1px solid ${c}20"><div style="font-size:9px;font-weight:700;color:${c};margin-bottom:3px">${t}</div><div style="font-size:7px;color:var(--t2);line-height:1.4;margin-bottom:4px">${d}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${c}">${a}</div></div>`).join('')}</div>${row('Epoch','Weekly auto-rolling')}${row('Mgmt fee','1%/year on TVL','#7B5CF0')}${row('Perf fee','10% of premium','#7B5CF0')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🏛 Structured Products</div>${[['Covered Call','ETH → weekly calls','~12%','#7B5CF0'],['Cash-Sec Put','USDC → puts','~8%','#0085FF'],['Principal Prot','Safe + lottery','~5-20%','#00F5A8']].map(([t,d,a,c])=>`<div style="padding:5px 7px;background:var(--card);border-radius:7px;border:1px solid ${c}20;margin-bottom:4px;display:flex;justify-content:space-between"><div><div style="font-size:8px;font-weight:700;color:${c}">${t}</div><div style="font-size:7px;color:var(--t2)">${d}</div></div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${c};align-self:center">${a}</div></div>`).join('')}</div>`)}`},
+
+{id:'levyield',n:'Leveraged Yield / Looping Vaults',s:'WikiLeveragedYield · ETH 3× loop · USDC 2× stable · 1% mgmt + 10% perf · Gearbox-style',i:'🌀',c:'#FF6B35',t:'NEW',cat:'EARN',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="background:var(--card);border-radius:9px;padding:9px;border:1px solid #FF6B3525"><div style="font-size:9px;font-weight:700;color:#FF6B35;margin-bottom:5px">ETH 3× Yield Loop</div>${[['Deposit','10 ETH ($30K)'],['Borrow (1st)','20 ETH at 5% APR'],['All 30 ETH staked','wstETH 4% APR'],['Gross yield','1.2 ETH/yr'],['Borrow cost','1.0 ETH/yr'],['Net APY','~2% leveraged']].map(([k,v])=>row(k,v,'#FF6B35')).join('')}</div><div style="background:var(--card);border-radius:9px;padding:9px;border:1px solid #0085FF25"><div style="font-size:9px;font-weight:700;color:#0085FF;margin-bottom:5px">USDC 2× Stable</div>${[['Deposit','$10K USDC'],['Borrow','$7.5K USDC (75% LTV)'],['Supply both','To WikiLending'],['Spread earned','2% net'],['Risk','Near zero (stable)'],['Auto-deleverage','If health < 1.1']].map(([k,v])=>row(k,v,'#0085FF')).join('')}</div></div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🌀 Leveraged Yield</div>${[['ETH 3× Loop','~12% APY · 60% LTV','#FF6B35'],['USDC 2× Stable','~4% APY · 75% LTV','#0085FF']].map(([t,d,c])=>`<div style="padding:7px;background:var(--card);border-radius:8px;border:1px solid ${c}20;margin-bottom:5px"><div style="font-size:9px;font-weight:700;color:${c}">${t}</div><div style="font-size:8px;color:var(--t2);margin-top:2px">${d}</div></div>`).join('')}</div>`)}`},
+
+{id:'yieldagg',n:'Yield Aggregator — Best APY Auto-Router',s:'WikiYieldAggregator · All vaults ranked · One-click depositBest() · Keeps capital in protocol',i:'🔀',c:'#00F5A8',t:'NEW',cat:'EARN',
+w:`${bb()}<div class="sp"><div style="font-size:9px;font-weight:700;margin-bottom:7px">ALL YIELD OPTIONS — RANKED BY APY</div>${[['🛡 WikiBackstopVault','15-25%','7-day','MEDIUM','#FFB020'],['⚖️ DeltaNeutralVault','11-28%','7-day','LOW','#00D4FF'],['⚡ FundingArbVault','10-15%','1-3 day','LOW','#0085FF'],['🏛 StructuredProduct','8-20%','Weekly','VARIES','#7B5CF0'],['🏦 WikiLending','4-8%','Instant','LOWEST','#00F5A8']].map(([n,a,e,r,c])=>`<div style="display:flex;align-items:center;padding:5px 0;border-bottom:1px solid #0E1E30;gap:7px"><span style="font-size:10px">${n.slice(0,2)}</span><div style="flex:1;font-size:9px;font-weight:600">${n.slice(2)}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${c}">${a}</div><span style="font-size:8px;color:var(--t2)">${e}</span></div>`).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🔀 Yield Aggregator</div>${[['Backstop','15-25% APY','#FFB020'],['Delta-Neutral','11-28%','#00D4FF'],['Funding Arb','10-15%','#0085FF'],['Lending','4-8% · Instant','#00F5A8']].map(([n,a,c])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0E1E30;font-size:8px"><span style="color:var(--t2)">${n}</span><span style="font-family:'JetBrains Mono',monospace;color:${c}">${a}</span></div>`).join('')}<div style="margin-top:7px;padding:7px;background:#00F5A808;border-radius:7px;border:1px solid #00F5A820;font-size:8px;color:#00F5A8">depositBest() auto-routes to highest APY</div></div>`)}`},
+
+// BOTS
+{id:'bots',n:'4 Automated Trading Bots',s:'WikiBotVault · Grid · Funding Arb · Trend · Mean Reversion · 20% perf fee → ops vault',i:'🤖',c:'#00F5A8',t:'BOTS',cat:'BOTS',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${[['🤖 Grid','60-70%\nWin rate','Best: Sideways','#00F5A8'],['⚡ Funding','80-90%\nCapture','Best: Bull','#FFB020'],['📊 Trend','47% WR\n3:1 RR','Best: Trending','#0085FF'],['↩️ Mean Rev','63% WR','Best: Ranging','#7B5CF0']].map(([icon,wr,best,c])=>`<div style="background:var(--card);border-radius:9px;padding:8px;border:1px solid ${c}20;text-align:center"><div style="font-size:13px;margin-bottom:4px">${icon.slice(0,2)}</div><div style="font-size:8px;font-weight:700;color:${c};white-space:pre-line">${wr}</div><div style="font-size:7px;color:var(--t2);margin-top:2px">${best}</div></div>`).join('')}</div><div style="margin-top:7px;background:#00F5A808;border-radius:8px;padding:8px;border:1px solid #00F5A820;font-size:9px;color:#00F5A8;line-height:1.6">20% performance fee on profits → WikiRevenueSplitter → WikiOpsVault (auto-invests at 12.4% APY)</div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🤖 Trading Bots</div>${[['GridBot','67% win · Sideways','#00F5A8'],['FundingArb','80-90% capture','#FFB020'],['TrendBot','3:1 reward/risk','#0085FF'],['MeanRevert','63% win · Ranging','#7B5CF0']].map(([n,d,c])=>`<div style="display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #0E1E30;gap:7px"><span style="font-size:9px;font-weight:700;color:${c}">${n}</span><span style="flex:1;font-size:8px;color:var(--t2)">${d}</span><span style="font-size:9px;color:#00F5A8">▶</span></div>`).join('')}</div>`)}`},
+
+// PROP TRADING
+{id:'prop',n:'Prop Trading — 2-Phase Evaluation',s:'WikiPropEval · WikiPropFunded · Phase 1 8% · Phase 2 5% · Balance resets · 80-90% split',i:'🏆',c:'#FFB020',t:'PROP',cat:'PROP',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">${[['Phase 1','8% target · 30 days','Max 100×\n4%/8% DD','#0085FF'],['→ RESET','Balance resets to 0','Prove again from scratch','#FFB020'],['Phase 2','5% target · 60 days','Max 50×\n3%/8% DD','#00F5A8']].map(([t,d,sub,c])=>`<div style="background:var(--card);border-radius:8px;padding:8px;border:1px solid ${c}20;text-align:center"><div style="font-size:9px;font-weight:700;color:${c};margin-bottom:3px">${t}</div><div style="font-size:8px;color:var(--t2);line-height:1.4">${d}</div><div style="font-size:7px;color:var(--t3);margin-top:3px;white-space:pre-line">${sub}</div></div>`).join('')}</div>${row('Consistency rule','No single day > 40% of profit','#FFB020')}${row('Min trading days','Phase 1: 4 · Phase 2: 5')}${row('Funded account max lev','10× (real pool capital)','#FF3355')}${row('Profit split','80-90% to trader','#00F5A8')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🏆 Prop Challenge</div>${[['Phase 1','8% target · 100× max','#0085FF'],['⚠ BALANCE RESET','Clean slate for Phase 2','#FFB020'],['Phase 2','5% target · 50× max','#00F5A8'],['✅ FUNDED','Up to $200K · 80-90% split','#00F5A8']].map(([t,d,c])=>`<div style="padding:5px 7px;background:var(--card);border-radius:7px;border-left:2px solid ${c};margin-bottom:3px"><div style="font-size:8px;font-weight:700;color:${c}">${t}</div><div style="font-size:7px;color:var(--t2)">${d}</div></div>`).join('')}</div>`)}`},
+
+// GROWTH
+{id:'season',n:'Season Points / XP System',s:'WikiSeasonPoints · Volume XP · Streak 2× multiplier · 90-day seasons · WIK rewards',i:'⭐',c:'#FFB020',t:'NEW',cat:'GROWTH',
+w:`${bb()}<div class="sp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;font-weight:700">Season 1 — 67 days left</span>${pill('ACTIVE','#FFB020')}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">${sb('MY RANK','#142','#FFB020')}${sb('MY XP','28,420','#00F5A8')}${sb('STREAK','23 days','#0085FF')}${sb('MULT','2.0×','#FF6B35')}</div>${[['Volume XP','1 XP per $100 notional'],['Daily active','10 XP per day + streak'],['Prop challenge','500 XP buy · 2000 XP pass'],['Referral','100 XP per trader referred'],['Streak 7+ days','1.5× multiplier'],['Streak 30+ days','2.0× multiplier']].map(([k,v])=>row(k,v,'#FFB020')).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:10px;font-weight:800">⭐ Season 1</span><span style="font-size:8px;color:#FFB020">67 days left</span></div><div style="text-align:center;padding:8px 0"><div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#FFB020">28,420</div><div style="font-size:8px;color:var(--t2)">XP · Rank #142 · 2× streak</div></div>${[['Volume','$2.8M referred'],['Streak','23 days 🔥'],['Multiplier','2.0×']].map(([k,v])=>row(k,v,'#FFB020')).join('')}</div>`)}`},
+
+{id:'leaderboard',n:'Public Trader Leaderboard',s:'WikiLeaderboard · P&L · Return % · Win rate · Volume · Weekly reset · Display names',i:'🏅',c:'#00F5A8',t:'NEW',cat:'GROWTH',
+w:`${bb()}<div class="sp"><div class="tabs"><div class="tab" style="background:#00F5A8;color:#000">Top P&L</div><div class="tab">Return %</div><div class="tab">Win Rate</div><div class="tab">Volume</div></div>${[['🥇','CryptoWhale_99','+$284,200','+284%'],['🥈','AlgoMaster88','+$142,800','+142%'],['🥉','ForexGuru','+$98,400','+98%'],['4.','DeltaTrader','+$76,300','+76%'],['5.','GridKing','+$54,100','+54%']].map(([rank,name,pnl,ret])=>`<div style="display:flex;align-items:center;padding:5px 0;border-bottom:1px solid #0E1E30;gap:8px"><span style="font-size:12px;min-width:20px">${rank}</span><span style="flex:1;font-size:9px;font-weight:700">${name}</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#00F5A8">${pnl}</span><span style="font-size:8px;color:#00F5A8">${ret}</span></div>`).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">🏅 Leaderboard</div>${[['🥇 CryptoWhale_99','+284%','#FFB020'],['🥈 AlgoMaster88','+142%','#A0A0A0'],['🥉 ForexGuru','+98%','#FF6B35'],['4. DeltaTrader','+76%','#00F5A8']].map(([n,r,c])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0E1E30;font-size:8px"><span style="color:var(--t2)">${n}</span><span style="color:${c};font-family:'JetBrains Mono',monospace;font-weight:700">${r}</span></div>`).join('')}</div>`)}`},
+
+{id:'revnft',n:'Revenue Share NFT — 0.01% Forever',s:'WikiRevenueShareNFT · 1,000 supply · $500/each · Perpetual fee share · ERC-721 · Transferable',i:'💎',c:'#FFB020',t:'NEW',cat:'GROWTH',
+w:`${bb()}<div class="sp"><div style="text-align:center;padding:8px 0;margin-bottom:8px"><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:#FFB020">wREV #0142</div><div style="font-size:10px;color:var(--t2);margin-top:3px">Wikicious Revenue Share NFT</div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px">${sb('FEE SHARE','0.01%','#FFB020')}${sb('MINTED','847/1,000','#00F5A8')}${sb('MINT PRICE','$500','#0085FF')}</div>${row('Cumulative earned','$1,284.20','#00F5A8')}${row('At $10M/day vol','$21/month · $252/yr','#FFB020')}${row('At $50M/day vol','$105/month · $1,260/yr','#FFB020')}${row('Secondary market','Transferable ERC-721','#0085FF')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">💎 Revenue NFT</div><div style="text-align:center;padding:7px;background:#FFB02010;border-radius:8px;border:1px solid #FFB02025;margin-bottom:6px"><div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FFB020">wREV #0142</div><div style="font-size:8px;color:var(--t2)">0.01% of all fees forever</div></div>${row('Earned so far','$1,284.20','#00F5A8')}${row('At $50M/day','$105/month','#FFB020')}</div>`)}`},
+
+{id:'refnft',n:'Elite Affiliate NFT',s:'WikiReferralNFT · Top 100 affiliates · 45% revenue share · Monthly prize pool · Revocable',i:'👑',c:'#FF6B35',t:'NEW',cat:'GROWTH',
+w:`${bb()}<div class="sp"><div style="display:flex;align-items:center;gap:10px;padding:8px;background:#FF6B3510;border-radius:10px;border:1px solid #FF6B3525;margin-bottom:8px"><div style="font-size:24px">👑</div><div><div style="font-size:11px;font-weight:800;color:#FF6B35">Elite Affiliate #0007</div><div style="font-size:9px;color:var(--t2);margin-top:2px">Top 100 affiliate · 45% revenue share</div></div></div>${row('Standard Diamond tier','40% share')}${row('Elite NFT bonus','45% share (+5%)','#FF6B35')}${row('Volume this month','$2.84M referred','#00F5A8')}${row('Fees earned','$14,200','#00F5A8')}${row('Monthly prize (rank #7)','$500 USDC','#FFB020')}${row('Revocation','<$10K vol in 60 days','#FF3355')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">👑 Elite Affiliate</div><div style="padding:7px;background:#FF6B3510;border-radius:8px;border:1px solid #FF6B3525;margin-bottom:5px;text-align:center"><div style="font-size:9px;font-weight:700;color:#FF6B35">Elite #0007 — 45% Share</div><div style="font-size:8px;color:var(--t2)">+5% vs standard Diamond</div></div>${row('Volume this month','$2.84M','#00F5A8')}${row('Prize (rank #7)','$500','#FFB020')}</div>`)}`},
+
+// WALLET
+{id:'multicol',n:'Multi-Collateral Margin',s:'WikiMultiCollateral · WBTC 80% LTV · WETH 85% · ARB 70% · Auto-liquidation · Health score',i:'💰',c:'#00F5A8',t:'NEW',cat:'WALLET',
+w:`${bb()}<div class="sp"><div style="font-size:9px;font-weight:700;margin-bottom:7px">YOUR COLLATERAL</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">${sb('WBTC','0.148 BTC','#F7931A')}${sb('WETH','2.48 ETH','#627EEA')}${sb('ARB','5,000','#23A8DE')}${sb('TOTAL','$18,420','#00F5A8')}</div>${row('Available margin','$15,120 (82% LTV avg)','#00F5A8')}${row('Margin used','$8,000')}${row('Health factor','1.89× ✅','#00F5A8')}${row('WBTC LTV','80% · $11,000 credit','#F7931A')}${row('WETH LTV','85% · $6,120 credit','#627EEA')}${row('ARB LTV','70% · $1,300 credit','#23A8DE')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">💰 Multi-Collateral</div><div style="padding:7px;background:#00F5A808;border-radius:8px;border:1px solid #00F5A820;margin-bottom:5px"><div style="font-size:8px;color:var(--t2)">HEALTH FACTOR</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#00F5A8">1.89× ✅</div></div>${[['WBTC','$11,000 credit','80% LTV'],['WETH','$6,120 credit','85% LTV'],['ARB','$1,300 credit','70% LTV']].map(([a,v,l])=>`<div style="display:flex;justify-content:space-between;font-size:8px;padding:3px 0;border-bottom:1px solid #0E1E30"><span style="color:var(--t2)">${a}</span><span style="color:#00F5A8;font-family:'JetBrains Mono',monospace">${v}</span></div>`).join('')}</div>`)}`},
+
+{id:'subacct',n:'Sub-Accounts — Up to 10 per Wallet',s:'WikiSubAccount · Isolated margin · Separate P&L · Per-sub leverage limits · Daily loss caps',i:'📂',c:'#0085FF',t:'NEW',cat:'WALLET',
+w:`${bb()}<div class="sp"><div style="font-size:9px;font-weight:700;margin-bottom:7px">YOUR SUB-ACCOUNTS</div>${[['Sub 1','Scalping','$5,000','50×','$500/day','🟢'],['Sub 2','Swing Trading','$20,000','10×','$2,000/day','🟢'],['Sub 3','Prop Challenge','$500','100×','Eval rules','🔵'],['Sub 4','Grid Bot','$2,000','3×','$300/day','🟢']].map(([n,l,b,lev,d,s])=>`<div style="display:flex;align-items:center;padding:5px 0;border-bottom:1px solid #0E1E30;gap:7px;font-size:8px"><span style="font-weight:700;min-width:35px">${n}</span><span style="color:var(--t2);flex:1">${l}</span><span style="font-family:'JetBrains Mono',monospace;color:#00F5A8">${b}</span><span style="color:#0085FF">${lev}</span><span>${s}</span></div>`).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">📂 Sub-Accounts</div>${[['Sub 1 · Scalping','$5K · 50× · active','#00F5A8'],['Sub 2 · Swing','$20K · 10× · active','#0085FF'],['Sub 3 · Prop','$500 · 100× · eval','#FFB020'],['Sub 4 · Bot','$2K · 3× · running','#7B5CF0']].map(([n,d,c])=>`<div style="padding:5px 7px;background:var(--card);border-radius:7px;border:1px solid ${c}20;margin-bottom:3px"><div style="font-size:8px;font-weight:700;color:${c}">${n}</div><div style="font-size:7px;color:var(--t2)">${d}</div></div>`).join('')}</div>`)}`},
+
+{id:'api',n:'API Gateway — Programmatic Trading',s:'WikiAPIGateway · Free/Pro/$50 · Institutional/$500 · Rate limits · Per-key permissions',i:'⚡',c:'#00D4FF',t:'NEW',cat:'WALLET',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">${[['FREE','$0/mo','100 orders/day\n$100K vol','#5C7EA0'],['PRO','$50/mo','10K orders/day\n$10M vol','#0085FF'],['INSTITUTIONAL','$500/mo','Unlimited\nPriority exec','#00D4FF']].map(([t,p,f,c])=>`<div style="background:var(--card);border-radius:8px;padding:8px;border:1px solid ${c}25;text-align:center"><div style="font-size:9px;font-weight:800;color:${c}">${t}</div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;margin:3px 0">${p}</div><div style="font-size:7px;color:var(--t2);white-space:pre-line">${f}</div></div>`).join('')}</div>${row('Your plan','PRO — $50/month','#0085FF')}${row('Orders today','2,841 / 10,000','#00D4FF')}${row('Volume today','$4.2M / $10M','#00D4FF')}${row('Active keys','3 keys','#00F5A8')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">⚡ API Gateway</div>${[['FREE','100 orders/day','#5C7EA0'],['PRO ($50/mo)','10K/day · $10M vol','#0085FF'],['INST ($500/mo)','Unlimited · Priority','#00D4FF']].map(([t,d,c])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #0E1E30;font-size:8px"><span style="color:${c};font-weight:700">${t}</span><span style="color:var(--t2)">${d}</span></div>`).join('')}</div>`)}`},
+
+{id:'telegram',n:'Telegram Trading Bot',s:'WikiTelegramGateway · /long /short /close · Price alerts · Balance · Link once',i:'📱',c:'#0085FF',t:'NEW',cat:'WALLET',
+w:`${bb()}<div class="sp"><div style="background:#0085FF0A;border-radius:10px;padding:10px;border:1px solid #0085FF20;margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:9px;line-height:2"><span style="color:var(--t2)">user:</span> /long BTC 1000 10x<br><span style="color:#00F5A8">bot:</span> ✅ BTC Long opened · $1,000 · 10× · Entry: $67,284<br><span style="color:var(--t2)">user:</span> /balance<br><span style="color:#00F5A8">bot:</span> 💵 Trading: $5,240 · P&L: +$284 (+5.7%)<br><span style="color:var(--t2)">user:</span> /alerts 70000<br><span style="color:#00F5A8">bot:</span> 🔔 Alert set: BTC above $70,000<br><span style="color:var(--t2)">user:</span> /positions<br><span style="color:#00F5A8">bot:</span> 📊 BTC Long 10× · +$284 · Health 72%</div>${row('Linked wallet','0xF4a2...3b91','#0085FF')}${row('Trading enabled','Yes · Daily limit: $100K','#00F5A8')}${row('Max order size','$10,000','#00F5A8')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0;font-family:'JetBrains Mono',monospace;font-size:8px;line-height:1.9"><span style="color:var(--t2)">you:</span> /long BTC 1000 10x<br><span style="color:#00F5A8">wiki:</span> ✅ Opened $1K · 10×<br><span style="color:var(--t2)">you:</span> /balance<br><span style="color:#00F5A8">wiki:</span> $5,240 · +$284 📈<br><span style="color:var(--t2)">you:</span> /alerts 70000<br><span style="color:#00F5A8">wiki:</span> 🔔 Alert set ✅<br><span style="color:var(--t2)">you:</span> /close 1<br><span style="color:#00F5A8">wiki:</span> ✅ Closed · +$284</div>`)}`},
+
+// ANALYTICS
+{id:'analytics',n:'On-Chain Analytics + Revenue Dashboard',s:'WikiOnChainAnalytics · WikiRevenueDashboard · DeFi Llama · Token Terminal · Public',i:'📊',c:'#00F5A8',t:'NEW',cat:'PROTOCOL',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">${sb('24H VOLUME','$48.2M','#00F5A8')}${sb('24H FEES','$33,740','#FFB020')}${sb('TOTAL TVL','$124M','#0085FF')}${sb('UNIQUE TRADERS','8,420','#7B5CF0')}</div>${[['All-time volume','$2.84B'],['All-time fees','$1.99M'],['Prop challenges','2,847'],['Funded accounts','341'],['Bot vault AUM','$8.4M'],['Annualised revenue','$14.6M']].map(([k,v])=>row(k,v,'#00F5A8')).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">📊 Protocol Stats</div><div style="text-align:center;padding:7px;background:#00F5A808;border-radius:8px;border:1px solid #00F5A820;margin-bottom:6px"><div style="font-size:7px;color:var(--t2)">24H FEES</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#FFB020">$33,740</div></div>${[['24H Vol','$48.2M'],['TVL','$124M'],['Traders','8,420']].map(([k,v])=>row(k,v,'#00F5A8')).join('')}</div>`)}`},
+
+{id:'portfolio',n:'Portfolio Tracker — Complete Net Worth',s:'WikiPortfolioTracker · All positions + yield + bots + prop · One getFullPortfolio() call',i:'💼',c:'#7B5CF0',t:'NEW',cat:'PROTOCOL',
+w:`${bb()}<div class="sp"><div style="background:linear-gradient(135deg,#0A1525,#0F1E35);border-radius:10px;padding:12px;border:1px solid var(--b2);margin-bottom:8px"><div style="font-size:8px;color:var(--t2);margin-bottom:3px">TOTAL NET WORTH</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:#00F5A8">$48,294</div><div style="font-size:10px;color:#00F5A8;margin-top:2px">+$1,284 today (+2.73%)</div></div>${[['🔓 Trading margin','$8,000','#00F5A8'],['🔒 veWIK staked','$12,400','#0085FF'],['⚖️ Delta-Neutral LP','$8,200','#00D4FF'],['🤖 Bot vault (Grid)','$5,284','#00F5A8'],['🏆 Prop funded acc.','$10,200','#FFB020'],['💵 USDC balance','$4,210','#00F5A8']].map(([k,v,c])=>row(k,v,c)).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:5px">💼 Portfolio</div><div style="text-align:center;margin-bottom:6px"><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#00F5A8">$48,294</div><div style="font-size:8px;color:#00F5A8">+$1,284 today</div></div>${[['Trading','$8,000','#00F5A8'],['Staking','$12,400','#0085FF'],['Delta-Neutral','$8,200','#00D4FF'],['Bot','$5,284','#00F5A8']].map(([k,v,c])=>row(k,v,c)).join('')}</div>`)}`},
+
+{id:'onboarding',n:'Mobile-First Onboarding — 3 Steps',s:'OnboardingPage.jsx · Connect → Strategy → Deposit · Under 2 minutes · Fiat on-ramp',i:'🚀',c:'#00F5A8',t:'UX',cat:'PROTOCOL',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${[['1️⃣ Connect','MetaMask\nWalletConnect\nCoinbase\nRainbow\nLedger','#00F5A8'],['2️⃣ Pick Strategy','Prop Challenge\nGrid Bot\nFunding Arb\nManual Trading','#FFB020'],['3️⃣ Deposit','Quick presets\nFiat on-ramp\nMin enforced\nContext shown','#0085FF']].map(([t,items,c])=>`<div style="background:var(--card);border-radius:9px;padding:9px;border:1px solid ${c}20"><div style="font-size:10px;font-weight:700;color:${c};margin-bottom:5px">${t}</div>${items.split('\n').map(i=>`<div style="font-size:8px;color:var(--t2);padding:2px 0;border-bottom:1px solid #0E1E30">• ${i}</div>`).join('')}</div>`).join('')}</div><div style="margin-top:7px;text-align:center;font-size:9px;color:var(--t2)">From zero to first action in <span style="color:#00F5A8;font-weight:700">under 90 seconds</span></div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="font-size:10px;font-weight:800;margin-bottom:6px">🚀 Onboarding</div>${[['Step 1','Connect Wallet','#00F5A8'],['Step 2','Pick Strategy','#FFB020'],['Step 3','Deposit USDC','#0085FF']].map(([s,t,c])=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #0E1E30"><div style="width:20px;height:20px;border-radius:6px;background:${c}20;border:1px solid ${c}30;display:flex;align-items:center;justify-content:center;font-size:8px;color:${c};font-weight:700">${s.slice(-1)}</div><span style="font-size:9px;font-weight:600">${t}</span></div>`).join('')}<div style="margin-top:7px;font-size:8px;color:#00F5A8;text-align:center">Under 90 seconds total</div></div>`)}`},
+
+{id:'adminpanel',n:'Admin Panel — Owner Only',s:'SessionAuth · Tenderly simulation · 13 groups · 123 contracts · 4-hour sessions',i:'🔐',c:'#FF6B35',t:'SECURE',cat:'PROTOCOL',
+w:`${bb()}<div style="display:grid;grid-template-columns:160px 1fr;height:194px;background:var(--bg2)"><div style="background:#030810;border-right:1px solid var(--b);padding:6px 0;overflow:hidden">${['💵 Salary','⏳ WIK Tokens','📈 Trading','📐 Leverage','💸 Revenue','💧 Liquidity','🔒 Earn','🌉 Bridge','🚀 Launch','🏆 Prop','🔮 Oracle','🗳 Governance','🏛 Ops Vault 🔐'].map(l=>`<div style="padding:5px 10px;font-size:8px;color:var(--t2)">${l}</div>`).join('')}</div><div style="padding:10px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:7px"><div style="padding:2px 8px;background:#00F5A815;border:1px solid #00F5A830;border-radius:100px;font-size:8px;color:#00F5A8">🟢 OWNER · 3h 42m left</div><button style="padding:2px 7px;border-radius:6px;border:1px solid #FF335530;background:#FF335510;color:#FF3355;font-size:7px;cursor:pointer">Sign Out</button></div><div style="background:#00F5A80A;border-radius:9px;padding:10px;border:1px solid #00F5A820;margin-bottom:7px"><div style="font-size:7px;color:var(--t2);margin-bottom:3px">CLAIMABLE SALARY</div><div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#00F5A8">$15,000</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px"><button class="btn" style="background:#00F5A8;color:#000">Claim $15,000</button><button class="btn" style="background:#0085FF15;border:1px solid #0085FF30;color:#0085FF">Simulate First</button></div></div></div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-size:10px;font-weight:800">🔐 Admin</span><span style="font-size:7px;color:#00F5A8">OWNER ONLY</span></div><div style="padding:7px;background:#00F5A808;border-radius:8px;border:1px solid #00F5A820;text-align:center;margin-bottom:6px"><div style="font-size:7px;color:var(--t2)">CLAIMABLE</div><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#00F5A8">$15,000</div></div><div style="font-size:8px;color:#FF6B35">Session: 3h 42m · Tenderly on</div></div>`)}`},
+
+{id:'opsvault',n:'Ops Vault — 12.4% APY on Idle Income',s:'WikiOpsVault · 30% fees auto-invest · Lending/Backstop/FundingArb · Withdraw anytime',i:'🏛',c:'#FFB020',t:'REVENUE',cat:'PROTOCOL',
+w:`${bb()}<div class="sp"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px">${sb('TOTAL VALUE','$686,127','#FFB020')}${sb('YIELD EARNED','$38,127','#00F5A8')}${sb('BLENDED APY','12.4%','#00D4FF')}${sb('INSTANT LIQUID','$343,062','#0085FF')}</div>${[['💵 Idle Buffer','$68,612','0% · Instant','var(--t2)'],['🏦 WikiLending','$274,450','~6% · Instant','#0085FF'],['🛡 Backstop','$274,450','~20% · 7-day','#FFB020'],['📊 Funding Arb','$68,615','~10% · 1-3d','#7B5CF0']].map(([l,v,n,c])=>`<div style="display:flex;align-items:center;padding:5px 0;border-bottom:1px solid #0E1E30;gap:8px"><span style="font-size:10px">${l.slice(0,2)}</span><div style="flex:1;font-size:9px;font-weight:600">${l.slice(2)}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:${c}">${v}</div><span style="font-size:8px;color:var(--t2)">${n}</span></div>`).join('')}</div>`,
+m:`${phone(`<div style="padding:5px 8px 0"><div style="text-align:center;padding:7px;background:#FFB02010;border-radius:8px;border:1px solid #FFB02025;margin-bottom:6px"><div style="font-size:7px;color:var(--t2)">TOTAL VALUE</div><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#FFB020">$686,127</div><div style="font-size:8px;color:#00F5A8">12.4% APY on idle income</div></div>${[['Lending','$274K · 6%','#0085FF'],['Backstop','$274K · 20%','#FFB020'],['Funding','$69K · 10%','#7B5CF0']].map(([k,v,c])=>row(k,v,c)).join('')}</div>`)}`},
+];
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+let V='w', CAT='ALL';
+const cats=['ALL','TRADING','SAFETY','EARN','BOTS','PROP','GROWTH','WALLET','PROTOCOL'];
+const catCounts={ALL:F.length};
+F.forEach(f=>{catCounts[f.cat]=(catCounts[f.cat]||0)+1});
+
+const catsEl=document.getElementById('cats');
+cats.forEach(c=>{
+  const b=document.createElement('button');
+  b.className='cb'+(c==='ALL'?' on':'');
+  b.textContent=`${c} (${catCounts[c]||0})`;
+  b.onclick=()=>{CAT=c;document.querySelectorAll('.cb').forEach(x=>x.classList.remove('on'));b.classList.add('on');rg()};
+  catsEl.appendChild(b);
+});
+
+function sv(v){V=v;document.querySelectorAll('.vbtn').forEach(b=>{b.classList.toggle('on',
+  (v==='w'&&b.textContent.includes('Web'))||(v==='m'&&b.textContent.includes('Mobile'))||(v==='b'&&b.textContent.includes('Both')))});rg()}
+
+function mkBody(f){
+  const brow = (h) => `<div style="background:var(--bg2)"><div class="bbar"><div class="dots"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FFBD2E"></div><div class="dot" style="background:#28C840"></div></div><div class="url">app.wikicious.io/${f.id}</div></div><div style="height:${h}px;overflow:hidden">${f.w}</div></div>`;
+  if(V==='w') return brow(240);
+  if(V==='m') return `<div style="display:flex;justify-content:center;padding:6px 0;background:var(--bg2)">${f.m}</div>`;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:var(--bg2)">
+    <div>${brow(195)}</div>
+    <div style="display:flex;justify-content:center;align-items:center;background:var(--bg2);padding:4px 0">${f.m}</div>
+  </div>`;
+}
+
+function rg(){
+  const shown=F.filter(f=>CAT==='ALL'||f.cat===CAT);
+  document.getElementById('grid').innerHTML=shown.map(f=>`
+    <div class="fc" onclick="om('${f.id}')" style="border-color:${f.c}15">
+      <div class="fch">
+        <div style="display:flex;align-items:center">
+          <div class="fci" style="background:${f.c}18;border:1px solid ${f.c}30">${f.i}</div>
+          <div><div class="fcn">${f.n}</div><div class="fcs">${f.s}</div></div>
+        </div>
+        <span class="ftag ${f.t==='NEW'?'new-tag':''}" style="${f.t!=='NEW'?`background:${f.c}15;border:1px solid ${f.c}30;color:${f.c}`:''}">${f.t}</span>
+      </div>
+      ${mkBody(f)}
+    </div>`).join('');
+}
+
+function om(id){
+  const f=F.find(x=>x.id===id);
+  document.getElementById('mc').innerHTML=`
+    <div class="mhd">
+      <div class="fci" style="background:${f.c}18;border:1px solid ${f.c}30;width:38px;height:38px;border-radius:10px;font-size:18px">${f.i}</div>
+      <div><div style="font-size:17px;font-weight:800">${f.n}</div><div style="font-size:10px;color:var(--t2);margin-top:2px">${f.s}</div></div>
+      <span class="ftag ${f.t==='NEW'?'new-tag':''}" style="margin-left:auto;${f.t!=='NEW'?`background:${f.c}15;border:1px solid ${f.c}30;color:${f.c}`:''}">${f.t}</span>
+    </div>
+    <div class="mbdy">
+      <div class="mpn">
+        <div class="mlbl">🖥 WEB APP</div>
+        <div style="background:var(--bg2);border-radius:10px;overflow:hidden">
+          <div class="bbar"><div class="dots"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FFBD2E"></div><div class="dot" style="background:#28C840"></div></div><div class="url">app.wikicious.io/${f.id}</div></div>
+          <div style="height:360px;overflow:hidden">${f.w}</div>
+        </div>
+      </div>
+      <div class="mpn">
+        <div class="mlbl">📱 FLUTTER MOBILE</div>
+        <div style="display:flex;justify-content:center">
+          <div style="width:200px;height:400px;border-radius:30px;background:linear-gradient(155deg,#101E35,#060D1A);border:2px solid #1C3050;padding:2px;box-shadow:0 20px 48px rgba(0,0,0,.8)">
+            <div style="position:relative;width:100%;height:100%;border-radius:28px;overflow:hidden;background:var(--bg)">
+              <div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);width:52px;height:12px;background:var(--bg);border-radius:7px;z-index:5"></div>
+              ${f.m}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function cm(e){if(!e||e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('open')}
+
+rg();
+</script>
+</body>
+</html>
